@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://bnounique0001"]
+
+[ext_resource type="Script" uid="uid://bnoscript0001" path="res://player.gd" id="1_k3j2h"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ab12c"]
+size = Vector2(32, 64)
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_k3j2h")
+speed = 300.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ab12c")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 0.8, 0.8, 1)
+
+[node name="Hand" type="Marker2D" parent="Sprite2D"]
+position = Vector2(12, 0)
+
+[node name="Area2D" type="Area2D" parent="." groups=["hitbox", "player"]]
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered" flags=3 unbinds=1 binds= [42, "x"]]

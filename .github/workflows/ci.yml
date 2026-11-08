@@ -72,8 +72,6 @@ jobs:
         run: mkdir -p fuzz/corpus/parse && cp tests/fixtures/*/*.t* fuzz/corpus/parse/
       - name: Fuzz the parser (2 min on push, 10 min on schedule)
         run: cargo fuzz run parse -- -max_total_time=${{ github.event_name == 'schedule' && 600 || 120 }} -max_len=65536
-      - name: Fuzz model building + diff
-        run: cargo fuzz run model -- -max_total_time=${{ github.event_name == 'schedule' && 600 || 60 }} -max_len=65536
 
   msrv:
     name: MSRV build

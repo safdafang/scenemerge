@@ -1,0 +1,80 @@
+[gd_resource type="Resource" script_class="AllTypes" format=3 uid="uid://b1g2h3j4k5l6m"]
+
+[ext_resource type="Script" uid="uid://c7n8p6q0r1s2t" path="res://all_types.gd" id="1_abcde"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="2"]
+
+[sub_resource type="Gradient" id="Gradient_x1y2z"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0.5, 0.5, 0.5, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_a8b7c"]
+gradient = SubResource("Gradient_x1y2z")
+
+[resource]
+script = ExtResource("1_abcde")
+v_null = null
+v_true = true
+v_false = false
+v_int = -42
+v_big = 9223372036854775807
+v_float = 3.14159
+v_exp = 1e-05
+v_inf = inf
+v_ninf = -inf
+v_nan = nan
+v_string = "Hello \"world\" \ back"
+v_multiline = "first line
+second line [not a section]
+third"
+v_unicode = "Привет, 世界 é 😀"
+v_string_name = &"my_name"
+v_node_path = NodePath("../Player:position:x")
+v_vector2 = Vector2(1.5, -2)
+v_vector2i = Vector2i(3, 4)
+v_rect2 = Rect2(0, 0, 64, 32)
+v_rect2i = Rect2i(0, 0, 8, 8)
+v_vector3 = Vector3(0, 1, 0)
+v_vector3i = Vector3i(1, 2, 3)
+v_vector4 = Vector4(1, 2, 3, 4)
+v_vector4i = Vector4i(1, 2, 3, 4)
+v_transform2d = Transform2D(1, 0, 0, 1, 10, 20)
+v_plane = Plane(0, 1, 0, 2)
+v_quaternion = Quaternion(0, 0, 0, 1)
+v_aabb = AABB(-1, -1, -1, 2, 2, 2)
+v_basis = Basis(1, 0, 0, 0, 1, 0, 0, 0, 1)
+v_transform3d = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+v_projection = Projection(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+v_color = Color(1, 0.5, 0.25, 1)
+v_hex_color = #ff8800
+v_rid = RID()
+v_signal = Signal()
+v_callable = Callable()
+v_bytes_b64 = PackedByteArray("AAECAwQ=")
+v_bytes_list = PackedByteArray(0, 1, 2, 255)
+v_bytes_empty = PackedByteArray()
+v_int32 = PackedInt32Array(1, -2, 3)
+v_int64 = PackedInt64Array(9007199254740993)
+v_f64 = PackedFloat64Array(0.1, 0.2)
+v_strings = PackedStringArray("a", "b, c", "")
+v_vec2s = PackedVector2Array(0, 0, 1, 1)
+v_vec3s = PackedVector3Array(0, 0, 0)
+v_vec4s = PackedVector4Array(1, 2, 3, 4)
+v_array = [1, "two", 3.0, [4, [5]], null]
+v_empty_array = []
+v_typed_array = Array[int]([1, 2, 3])
+v_typed_array_class = Array[Resource]([])
+v_typed_array_script = Array[ExtResource("1_abcde")]([])
+v_dictionary = {
+"a": 1,
+2: "b",
+Vector2(0, 0): [1, 2]
+}
+v_empty_dict = {}
+v_typed_dict = Dictionary[String, int]({
+"one": 1,
+"two": 2
+})
+v_ext = ExtResource("2")
+v_sub = SubResource("GradientTexture1D_a8b7c")
+v_resource = Resource("uid://c7n8p6q0r1s2t", "res://all_types.gd")
+v_object = Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"keycode":65,"pressed":false,"script":null)

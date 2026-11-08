@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://binherited001"]
+
+[ext_resource type="PackedScene" uid="uid://bbasescene01" path="res://base.tscn" id="1_base1"]
+[ext_resource type="Texture2D" uid="uid://btexture0001" path="res://boss.png" id="2_tex12"]
+
+[node name="Boss" unique_id=1111 instance=ExtResource("1_base1")]
+health = 500
+
+[node name="Sprite2D" parent="." index="0" unique_id=2222]
+texture = ExtResource("2_tex12")
+
+[node name="Gun" parent="Arm/Hand" parent_id_path=PackedInt32Array(3333, 4444) index="1" unique_id=5555]
+damage = 9
+
+[node name="Placeholder" parent="." unique_id=6666 instance_placeholder="res://later.tscn"]
+
+[node name="Owned" type="Node" parent="Arm" owner="Arm" owner_uid_path=PackedInt32Array(3333) unique_id=7777 node_paths=PackedStringArray("target")]
+target = NodePath("../Hand")
+
+[editable path="Arm"]
+[editable path="Arm/Hand"]

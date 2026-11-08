@@ -1,0 +1,320 @@
+[gd_scene format=3 uid="uid://berd34e1fxw6d"]
+
+[ext_resource type="Script" uid="uid://d4b8vgmej8fg0" path="res://output_max_linear_value/flash_orchestrator.gd" id="1_7feuc"]
+[ext_resource type="PackedScene" uid="uid://bijyfxd7bo21v" path="res://output_max_linear_value/geodesic-sphere.glb" id="2_7feuc"]
+[ext_resource type="Script" uid="uid://8fnkvv7j1nwv" path="res://output_max_linear_value/rotate.gd" id="2_njmsf"]
+
+[sub_resource type="Environment" id="Environment_njmsf"]
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.42
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7yjk0"]
+albedo_color = Color(0.13333334, 0.16078432, 0.19607843, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r46wb"]
+shading_mode = 0
+albedo_color = Color(0.37021315, 0.17127198, 0.10240973, 1)
+
+[node name="Node3D" type="Node3D" unique_id=1416688204 node_paths=PackedStringArray("meshes")]
+script = ExtResource("1_7feuc")
+base_colors = Array[Color]([Color(0.4383469, 0.18152684, 0.094284914, 1), Color(0.11448214, 0.2458665, 0.41194695, 1), Color(0.17459896, 0.35552335, 0.31885692, 1), Color(0.32928962, 0.36724612, 0.15746233, 1), Color(0.39016208, 0.14532027, 0.1877656, 1), Color(0.38054246, 0.18174157, 0.3412228, 1), Color(0.30982816, 0.31805637, 0.3737292, 1)])
+meshes = [NodePath("geodesic-sphere2/GD_mesh_002"), NodePath("geodesic-sphere2/GD_mesh_003"), NodePath("geodesic-sphere2/GD_mesh_004"), NodePath("geodesic-sphere2/GD_mesh_005"), NodePath("geodesic-sphere2/GD_mesh_006"), NodePath("geodesic-sphere2/GD_mesh_007"), NodePath("geodesic-sphere2/GD_mesh_008"), NodePath("geodesic-sphere2/GD_mesh_009"), NodePath("geodesic-sphere2/GD_mesh_010"), NodePath("geodesic-sphere2/GD_mesh_011"), NodePath("geodesic-sphere2/GD_mesh_012"), NodePath("geodesic-sphere2/GD_mesh_013"), NodePath("geodesic-sphere2/GD_mesh_014"), NodePath("geodesic-sphere2/GD_mesh_015"), NodePath("geodesic-sphere2/GD_mesh_016"), NodePath("geodesic-sphere2/GD_mesh_017"), NodePath("geodesic-sphere2/GD_mesh_018"), NodePath("geodesic-sphere2/GD_mesh_019"), NodePath("geodesic-sphere2/GD_mesh_020"), NodePath("geodesic-sphere2/GD_mesh_021"), NodePath("geodesic-sphere2/GD_mesh_022"), NodePath("geodesic-sphere2/GD_mesh_023"), NodePath("geodesic-sphere2/GD_mesh_024"), NodePath("geodesic-sphere2/GD_mesh_025"), NodePath("geodesic-sphere2/GD_mesh_026"), NodePath("geodesic-sphere2/GD_mesh_027"), NodePath("geodesic-sphere2/GD_mesh_028"), NodePath("geodesic-sphere2/GD_mesh_029"), NodePath("geodesic-sphere2/GD_mesh_030"), NodePath("geodesic-sphere2/GD_mesh_031"), NodePath("geodesic-sphere2/GD_mesh_032"), NodePath("geodesic-sphere2/GD_mesh_033"), NodePath("geodesic-sphere2/GD_mesh_034"), NodePath("geodesic-sphere2/GD_mesh_035"), NodePath("geodesic-sphere2/GD_mesh_036"), NodePath("geodesic-sphere2/GD_mesh_037"), NodePath("geodesic-sphere2/GD_mesh_038"), NodePath("geodesic-sphere2/GD_mesh_039"), NodePath("geodesic-sphere2/GD_mesh_040"), NodePath("geodesic-sphere2/GD_mesh_041"), NodePath("geodesic-sphere2/GD_mesh_042"), NodePath("geodesic-sphere2/GD_mesh_043"), NodePath("geodesic-sphere2/GD_mesh_044"), NodePath("geodesic-sphere2/GD_mesh_045"), NodePath("geodesic-sphere2/GD_mesh_046"), NodePath("geodesic-sphere2/GD_mesh_047"), NodePath("geodesic-sphere2/GD_mesh_048"), NodePath("geodesic-sphere2/GD_mesh_049"), NodePath("geodesic-sphere2/GD_mesh_050"), NodePath("geodesic-sphere2/GD_mesh_051"), NodePath("geodesic-sphere2/GD_mesh_052"), NodePath("geodesic-sphere2/GD_mesh_053"), NodePath("geodesic-sphere2/GD_mesh_054"), NodePath("geodesic-sphere2/GD_mesh_055"), NodePath("geodesic-sphere2/GD_mesh_056"), NodePath("geodesic-sphere2/GD_mesh_057"), NodePath("geodesic-sphere2/GD_mesh_058"), NodePath("geodesic-sphere2/GD_mesh_059"), NodePath("geodesic-sphere2/GD_mesh_060"), NodePath("geodesic-sphere2/GD_mesh_061"), NodePath("geodesic-sphere2/GD_mesh_062"), NodePath("geodesic-sphere2/GD_mesh_063"), NodePath("geodesic-sphere2/GD_mesh_064"), NodePath("geodesic-sphere2/GD_mesh_065"), NodePath("geodesic-sphere2/GD_mesh_066"), NodePath("geodesic-sphere2/GD_mesh_067"), NodePath("geodesic-sphere2/GD_mesh_068"), NodePath("geodesic-sphere2/GD_mesh_069"), NodePath("geodesic-sphere2/GD_mesh_070"), NodePath("geodesic-sphere2/GD_mesh_071"), NodePath("geodesic-sphere2/GD_mesh_072"), NodePath("geodesic-sphere2/GD_mesh_073"), NodePath("geodesic-sphere2/GD_mesh_074"), NodePath("geodesic-sphere2/GD_mesh_075"), NodePath("geodesic-sphere2/GD_mesh_076"), NodePath("geodesic-sphere2/GD_mesh_077"), NodePath("geodesic-sphere2/GD_mesh_078"), NodePath("geodesic-sphere2/GD_mesh_079"), NodePath("geodesic-sphere2/GD_mesh_080"), NodePath("geodesic-sphere2/GD_mesh_081"), NodePath("geodesic-sphere2/GD_mesh_082"), NodePath("geodesic-sphere2/GD_mesh_083"), NodePath("geodesic-sphere2/GD_mesh_084"), NodePath("geodesic-sphere2/GD_mesh_085"), NodePath("geodesic-sphere2/GD_mesh_086"), NodePath("geodesic-sphere2/GD_mesh_087"), NodePath("geodesic-sphere2/GD_mesh_088"), NodePath("geodesic-sphere2/GD_mesh_089"), NodePath("geodesic-sphere2/GD_mesh_090"), NodePath("geodesic-sphere2/GD_mesh_091"), NodePath("geodesic-sphere2/GD_mesh_092"), NodePath("geodesic-sphere2/GD_mesh_093")]
+time_between_flashes = 0.03
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=586491415]
+environment = SubResource("Environment_njmsf")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=541939234]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4.3336964)
+fov = 32.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=620705289]
+transform = Transform3D(0.8151278, -0.3838433, 0.43385592, 0, 0.7489557, 0.66262007, -0.57928115, -0.54012, 0.6104946, 1.0939837, 1.4612691, 1.1567811)
+light_energy = 0.208
+
+[node name="geodesic-sphere2" parent="." unique_id=1877031042 instance=ExtResource("2_7feuc")]
+transform = Transform3D(1, 0, 0, 0, 1.0000001, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("2_njmsf")
+rotation_speed = 0.3
+
+[node name="GD_mesh_001" parent="geodesic-sphere2" index="0" unique_id=1979874647]
+material_override = SubResource("StandardMaterial3D_7yjk0")
+
+[node name="GD_mesh_002" parent="geodesic-sphere2" index="1" unique_id=1443126948]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_003" parent="geodesic-sphere2" index="2" unique_id=523826071]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_004" parent="geodesic-sphere2" index="3" unique_id=1152408470]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_005" parent="geodesic-sphere2" index="4" unique_id=1532245439]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_006" parent="geodesic-sphere2" index="5" unique_id=1826599447]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_007" parent="geodesic-sphere2" index="6" unique_id=29562333]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_008" parent="geodesic-sphere2" index="7" unique_id=356106602]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_009" parent="geodesic-sphere2" index="8" unique_id=1832917762]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_010" parent="geodesic-sphere2" index="9" unique_id=1708956385]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_011" parent="geodesic-sphere2" index="10" unique_id=636860771]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_012" parent="geodesic-sphere2" index="11" unique_id=832672629]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_013" parent="geodesic-sphere2" index="12" unique_id=642667260]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_014" parent="geodesic-sphere2" index="13" unique_id=374707359]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_015" parent="geodesic-sphere2" index="14" unique_id=1578352662]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_016" parent="geodesic-sphere2" index="15" unique_id=314182396]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_017" parent="geodesic-sphere2" index="16" unique_id=908064619]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_018" parent="geodesic-sphere2" index="17" unique_id=1540114153]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_019" parent="geodesic-sphere2" index="18" unique_id=481061289]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_020" parent="geodesic-sphere2" index="19" unique_id=1292505344]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_021" parent="geodesic-sphere2" index="20" unique_id=257450623]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_022" parent="geodesic-sphere2" index="21" unique_id=1313582240]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_023" parent="geodesic-sphere2" index="22" unique_id=1774551366]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_024" parent="geodesic-sphere2" index="23" unique_id=1394202498]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_025" parent="geodesic-sphere2" index="24" unique_id=1689305271]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_026" parent="geodesic-sphere2" index="25" unique_id=2114969547]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_027" parent="geodesic-sphere2" index="26" unique_id=1986032198]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_028" parent="geodesic-sphere2" index="27" unique_id=797942497]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_029" parent="geodesic-sphere2" index="28" unique_id=1583426061]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_030" parent="geodesic-sphere2" index="29" unique_id=1508231596]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_031" parent="geodesic-sphere2" index="30" unique_id=765570556]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_032" parent="geodesic-sphere2" index="31" unique_id=1157986428]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_033" parent="geodesic-sphere2" index="32" unique_id=72424519]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_034" parent="geodesic-sphere2" index="33" unique_id=1308377474]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_035" parent="geodesic-sphere2" index="34" unique_id=1423797800]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_036" parent="geodesic-sphere2" index="35" unique_id=178178837]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_037" parent="geodesic-sphere2" index="36" unique_id=1418253080]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_038" parent="geodesic-sphere2" index="37" unique_id=1869331163]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_039" parent="geodesic-sphere2" index="38" unique_id=746661522]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_040" parent="geodesic-sphere2" index="39" unique_id=856581250]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_041" parent="geodesic-sphere2" index="40" unique_id=1318127160]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_042" parent="geodesic-sphere2" index="41" unique_id=1468096347]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_043" parent="geodesic-sphere2" index="42" unique_id=1205477213]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_044" parent="geodesic-sphere2" index="43" unique_id=320448401]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_045" parent="geodesic-sphere2" index="44" unique_id=1691053409]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_046" parent="geodesic-sphere2" index="45" unique_id=1780663931]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_047" parent="geodesic-sphere2" index="46" unique_id=1260463140]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_048" parent="geodesic-sphere2" index="47" unique_id=818755898]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_049" parent="geodesic-sphere2" index="48" unique_id=1892491172]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_050" parent="geodesic-sphere2" index="49" unique_id=1084086924]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_051" parent="geodesic-sphere2" index="50" unique_id=259018282]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_052" parent="geodesic-sphere2" index="51" unique_id=1239140085]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_053" parent="geodesic-sphere2" index="52" unique_id=1761479729]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_054" parent="geodesic-sphere2" index="53" unique_id=748831942]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_055" parent="geodesic-sphere2" index="54" unique_id=316245318]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_056" parent="geodesic-sphere2" index="55" unique_id=731158839]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_057" parent="geodesic-sphere2" index="56" unique_id=1817456283]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_058" parent="geodesic-sphere2" index="57" unique_id=354176156]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_059" parent="geodesic-sphere2" index="58" unique_id=227712300]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_060" parent="geodesic-sphere2" index="59" unique_id=173621831]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_061" parent="geodesic-sphere2" index="60" unique_id=136136874]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_062" parent="geodesic-sphere2" index="61" unique_id=1320315928]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_063" parent="geodesic-sphere2" index="62" unique_id=1007112123]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_064" parent="geodesic-sphere2" index="63" unique_id=1053241343]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_065" parent="geodesic-sphere2" index="64" unique_id=1491667754]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_066" parent="geodesic-sphere2" index="65" unique_id=1012547673]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_067" parent="geodesic-sphere2" index="66" unique_id=646006326]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_068" parent="geodesic-sphere2" index="67" unique_id=1100349732]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_069" parent="geodesic-sphere2" index="68" unique_id=1794609140]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_070" parent="geodesic-sphere2" index="69" unique_id=1596088450]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_071" parent="geodesic-sphere2" index="70" unique_id=2002840524]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_072" parent="geodesic-sphere2" index="71" unique_id=1335727631]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_073" parent="geodesic-sphere2" index="72" unique_id=599939326]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_074" parent="geodesic-sphere2" index="73" unique_id=1605114645]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_075" parent="geodesic-sphere2" index="74" unique_id=820152486]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_076" parent="geodesic-sphere2" index="75" unique_id=1485161936]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_077" parent="geodesic-sphere2" index="76" unique_id=215273430]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_078" parent="geodesic-sphere2" index="77" unique_id=692212938]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_079" parent="geodesic-sphere2" index="78" unique_id=1833943114]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_080" parent="geodesic-sphere2" index="79" unique_id=1945771285]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_081" parent="geodesic-sphere2" index="80" unique_id=72505426]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_082" parent="geodesic-sphere2" index="81" unique_id=2114161523]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_083" parent="geodesic-sphere2" index="82" unique_id=30855889]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_084" parent="geodesic-sphere2" index="83" unique_id=530430289]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_085" parent="geodesic-sphere2" index="84" unique_id=1367710244]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_086" parent="geodesic-sphere2" index="85" unique_id=171501798]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_087" parent="geodesic-sphere2" index="86" unique_id=2067786534]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_088" parent="geodesic-sphere2" index="87" unique_id=774212074]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_089" parent="geodesic-sphere2" index="88" unique_id=1062659179]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_090" parent="geodesic-sphere2" index="89" unique_id=906879787]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_091" parent="geodesic-sphere2" index="90" unique_id=284582997]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_092" parent="geodesic-sphere2" index="91" unique_id=1423971746]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[node name="GD_mesh_093" parent="geodesic-sphere2" index="92" unique_id=826128349]
+material_override = SubResource("StandardMaterial3D_r46wb")
+
+[editable path="geodesic-sphere2"]

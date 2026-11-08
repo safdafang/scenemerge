@@ -1,0 +1,28 @@
+;; Hand-edited file: comments, odd spacing and quoted keys are all legal.
+; Godot discards comments when it re-saves a file, but must be able to read them.
+
+[gd_scene   format=3 uid="uid://d0ummyuid0001" ; comment inside a header
+]
+
+; between sections
+[ext_resource type="Script" path="res://main.gd" id="1"]
+
+[node name="Main" type="Node2D"]
+script=ExtResource( "1" )
+position   =   Vector2( 1 ,   2 ) ; trailing comment
+"quoted key with spaces" = 1
+"key=with;specials" = "v"
+metadata/_edit_lock_ = true
+array_on_lines = [
+	1, ; one
+	2,
+	3
+]
+dict_value = {
+"k": "v" ; comment inside dictionary
+}
+
+[node name="Child" type="Sprite2D" parent="."]
+	indented_key = 5
+
+[connection signal="ready" from="." to="." method="_on_ready"]
