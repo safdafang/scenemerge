@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="UI" type="Control"]
+
+[node name="Start" type="Button" parent="."]
+
+[connection signal="pressed" from="Start" to="." method="_on_start_pressed"]

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D" unique_id=1]
+
+<<<<<<< ours
+[node name="Grunt" type="Node2D" parent="." unique_id=2]
+=======
+[node name="Minion" type="Node2D" parent="." unique_id=2]
+>>>>>>> theirs

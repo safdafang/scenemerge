@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="UI" type="Control"]
+
+[node name="Play" type="Button" parent="."]
+
+<<<<<<< ours
+[connection signal="pressed" from="Play" to="." method="_on_play_pressed" flags=6]
+=======
+>>>>>>> theirs

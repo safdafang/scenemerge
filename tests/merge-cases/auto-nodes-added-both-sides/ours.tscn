@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D"]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Slime" type="CharacterBody2D" parent="Enemies"]
+position = Vector2(100, 0)
+
+[node name="Items" type="Node2D" parent="."]

@@ -1,18 +1,22 @@
-//! Model building and diffing must never panic.
+//! Model building, diff and merge must never panic.
 //!
-//! The input is split at the first NUL byte into two files.
+//! The input is split at NUL bytes into up to three files (base, ours, theirs);
+//! missing parts reuse the previous one.
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
+use scene_merge::{merge, ConflictStyle, MergeOptions};
+use scene_model::SceneFile;
 
 fuzz_target!(|data: &[u8]| {
-    let (a, b) = match data.iter().position(|&c| c == 0) {
-        Some(i) => (&data[..i], &data[i + 1..]),
-        None => (data, data),
-    };
-    let (Ok(fa), Ok(fb)) = (
-        scene_model::SceneFile::parse_bytes(a),
-        scene_model::SceneFile::parse_bytes(b),
+    let mut parts = data.splitn(3, |&c| c == 0);
+    let a = parts.next().unwrap_or(&[]);
+    let b = parts.next().unwrap_or(a);
+    let c = parts.next().unwrap_or(b);
+    let (Ok(fa), Ok(fb), Ok(fc)) = (
+        SceneFile::parse_bytes(a),
+        SceneFile::parse_bytes(b),
+        SceneFile::parse_bytes(c),
     ) else {
         return;
     };
@@ -23,4 +27,16 @@ fuzz_target!(|data: &[u8]| {
     let _ = scene_diff::canonical_text(&fa);
     // A file never differs from itself.
     assert!(scene_diff::diff(&fa, &fa, &scene_diff::DiffOptions::default()).is_empty());
+    let valid = fa.validate().is_empty() && fb.validate().is_empty() && fc.validate().is_empty();
+    for style in [ConflictStyle::Markers, ConflictStyle::Ours, ConflictStyle::Theirs] {
+        let opts = MergeOptions {
+            conflict: style,
+            ..MergeOptions::default()
+        };
+        let r = merge(&fa, &fb, &fc, &opts);
+        // On valid inputs of one kind, merging never fails.
+        if valid && fa.kind == fb.kind && fb.kind == fc.kind {
+            assert!(r.is_ok(), "{:?}", r.err());
+        }
+    }
 });

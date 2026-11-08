@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "clean": true,
+  "conflicts": [],
+  "resolutions": [
+    {
+      "kind": "sub_resource_id",
+      "target": "sub_resource:BoxShape3D",
+      "from": "BoxShape3D_abcde",
+      "to": "BoxShape3D_c8iyo"
+    }
+  ]
+}

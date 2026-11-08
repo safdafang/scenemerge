@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "clean": true,
+  "conflicts": [],
+  "resolutions": [
+    {
+      "kind": "ext_resource_id",
+      "target": "ext_resource:res://blue.png",
+      "from": "2_xyz12",
+      "to": "3_2ih0w"
+    }
+  ]
+}

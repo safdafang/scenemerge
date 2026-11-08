@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Sprite2D"]

@@ -40,6 +40,16 @@ pub struct Field {
     pub raw_value: String,
 }
 
+/// Godot's saver writes `binds= [...]` (with a space) in connections and
+/// `key=value` everywhere else.
+fn field_separator(header: &str, key: &str) -> &'static str {
+    if header == "connection" && key == "binds" {
+        "= "
+    } else {
+        "="
+    }
+}
+
 /// A section header such as `[node name="Player" type="CharacterBody2D" parent="."]`.
 #[derive(Debug, Clone)]
 pub struct Header {
@@ -67,7 +77,7 @@ impl Header {
             let value = parse_value_str(&raw_value)?;
             raw.push(' ');
             raw.push_str(key);
-            raw.push('=');
+            raw.push_str(field_separator(name, key));
             raw.push_str(&raw_value);
             parsed.push(Field {
                 key: key.to_string(),
@@ -108,7 +118,7 @@ impl Header {
         for f in &self.fields {
             raw.push(' ');
             raw.push_str(&f.key);
-            raw.push('=');
+            raw.push_str(field_separator(&self.name, &f.key));
             raw.push_str(&f.raw_value);
         }
         raw.push(']');

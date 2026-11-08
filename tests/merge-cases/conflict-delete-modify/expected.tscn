@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D"]
+
+<<<<<<< ours
+[node name="Spawner" type="Node2D" parent="."]
+rate = 2.0
+
+[node name="Marker" type="Marker2D" parent="Spawner"]
+=======
+>>>>>>> theirs
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 2

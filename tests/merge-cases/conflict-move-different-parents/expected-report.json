@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "move",
+      "target": "node:A/Coin",
+      "property": "parent",
+      "base": "parent=\".\"",
+      "ours": "parent=\"A\"",
+      "theirs": "parent=\"B\"",
+      "resolution": "markers",
+      "line": 7
+    }
+  ],
+  "resolutions": []
+}

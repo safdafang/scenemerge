@@ -25,3 +25,9 @@ anstyle.workspace = true
 [dev-dependencies]
 insta.workspace = true
 proptest.workspace = true
+criterion.workspace = true
+mimalloc.workspace = true
+
+[[bench]]
+name = "diff_10k"
+harness = false

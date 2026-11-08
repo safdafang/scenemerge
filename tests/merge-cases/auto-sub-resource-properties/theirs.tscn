@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a"]
+size = Vector3(1, 1, 1)
+margin = 0.1
+
+[node name="Body" type="CollisionShape3D"]
+shape = SubResource("BoxShape3D_a")
+disabled = true

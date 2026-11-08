@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "property",
+      "target": "node:Effect",
+      "property": "amount",
+      "ours": "16",
+      "theirs": "32",
+      "resolution": "markers",
+      "line": 10
+    },
+    {
+      "kind": "add_add",
+      "target": "node:Effect",
+      "property": "type",
+      "ours": "type=\"GPUParticles2D\"",
+      "theirs": "type=\"CPUParticles2D\"",
+      "resolution": "markers",
+      "line": 5
+    }
+  ],
+  "resolutions": []
+}

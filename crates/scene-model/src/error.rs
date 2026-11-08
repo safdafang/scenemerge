@@ -11,7 +11,7 @@ pub enum ModelError {
     #[error("{0}")]
     Parse(ParseError),
     /// The file uses a format version other than 3.
-    #[error("{}unsupported file format {format}: {message}", path_prefix(.path))]
+    #[error("{}unsupported file format {format}: {message}", path_prefix(.path).replace(':', ": "))]
     UnsupportedFormat {
         /// The `format=` value found.
         format: i64,

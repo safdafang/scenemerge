@@ -177,6 +177,112 @@ sub-resources canonically would turn one insertion into a cascade of changes.
 * `--global` uses `core.attributesFile`, falling back to
   `$XDG_CONFIG_HOME/git/attributes` or `~/.config/git/attributes` (Git's defaults).
 
+## D11. Three-way merge (spec §6)
+
+`scene_merge::merge` works on the model and writes the result starting from
+OURS, so that every untouched section is copied byte for byte (the diff of
+the result against OURS is minimal, and `merge(base, x, base) == x` exactly).
+
+* **Decision rule** for every property and header field: THEIRS unchanged →
+  ours; OURS unchanged → theirs; both equal → ours; otherwise a conflict.
+  Values are compared after normalisation (D7), so renumbered ids never
+  conflict. For entities added on both sides (no BASE) it is a two-way merge:
+  a property set on one side only is kept, different values conflict.
+* **Identity fields** (`unique_id`, `*_id_path`) never conflict: if both sides
+  assigned different values (both re-saved with 4.6), OURS wins silently.
+* **Deletions** are applied per subtree: a deletion by THEIRS is clean only if
+  OURS did not change any node of that subtree and did not add children to it;
+  otherwise the whole subtree is one `delete_modify` conflict (markers wrap the
+  whole block). Symmetrically for nodes OURS deleted and THEIRS changed. Moves
+  are resolved *before* deletions, so moving a child out of a node and
+  deleting the node is clean.
+* **New nodes from THEIRS** are inserted after their previous sibling in
+  THEIRS, and after any siblings that only OURS added there (a textual merge
+  also puts our lines first). Moves and sibling reorders done by THEIRS (when
+  OURS kept the base order) move the node with its whole subtree.
+* **Renames/moves** update `parent=` of descendants and connection `from`/`to`
+  automatically: those are recomputed from the final tree. NodePath property
+  values (`NodePath("../Player")`) are *not* rewritten — the editor already
+  rewrote them on the side that renamed (a limitation, see README).
+* **Resources** are imported from THEIRS on demand, when merged content
+  references them. An ext_resource is the same file if uid/path match; a new
+  one keeps the id from THEIRS unless that id is taken, then gets a fresh
+  Godot-style id `"<n>_<5 chars>"` (alphabet `a`–`y`, `0`–`8`, see the format
+  notes) and every reference is rewritten at token level, so formatting is kept.
+  Sub-resources likewise (`"<Type>_<5 chars>"`); nested sub-resources are
+  imported dependencies first. Ext/sub resources that THEIRS deleted are removed
+  if nothing references them any more. Sub-resources are finally topologically
+  sorted (defined before use). Ids are generated deterministically (seeded from
+  the inputs): the same merge always produces the same file.
+* **unique_id collisions** (two *different* new nodes with the same id) are
+  resolved like local id collisions: the node from THEIRS gets a fresh id,
+  reported in `resolutions`. The brief lists this under conflicts; it is
+  resolved automatically because Godot itself reassigns duplicate unique ids on
+  save (`packed_scene.cpp`), so there is nothing for a human to decide. Two new
+  nodes with the same unique_id *and* the same place are the same node.
+* **Conflict markers** (`--conflict markers`) surround the smallest unit: one
+  property line, one header line (rename/move/type/instance…), one connection
+  line, or one node block for delete/modify. The file then does not open in
+  Godot until fixed — by design, as with any Git conflict.
+  `--conflict ours|theirs` produce a valid file and still report conflicts.
+* **Line endings** follow OURS; imported text (including line breaks inside
+  multi-line strings) is converted, which matches what `core.autocrlf` does to
+  the working copy anyway. `load_steps` is recomputed only when the number of
+  resources changed; `format` is raised to 4 only when content that needs it
+  came from THEIRS.
+* **Safety net**: a result without markers is re-parsed and validated; if it is
+  invalid, `merge` returns an internal error instead of writing a broken file.
+  The CLI option `--on-error text` (used by the installed Git driver) then falls
+  back to `git merge-file`, i.e. what Git would have done without scenemerge.
+  This also covers Godot 3 files and files that do not parse.
+* **Exit codes** 0 clean, 1 conflicts, 2 error (Git treats 1..=128 as
+  "conflicted", so an error leaves the file marked as conflicted; see D10).
+
+## D12. Performance
+
+Target: diff of a 10 000-node scene in < 200 ms. Measured on the development
+laptop (Windows 11, release build) with `cargo bench -p scene-diff`, which
+parses both versions, builds both models and diffs them: **≈160 ms**. Per
+10k-node file, parsing takes ≈45 ms and the model ≈15 ms; matching + diff of
+the pair ≈30 ms. Decisions that got there:
+
+* The CLI uses **mimalloc** as global allocator. Parsing allocates many small
+  strings and the Windows system allocator roughly doubles the parse time; the
+  benchmark uses the same allocator as the CLI. (With the system allocator the
+  same work takes ≈250 ms.)
+* Both (diff) or all three (merge) files are **parsed in parallel**.
+* Linear-time model building (no per-node hash maps for duplicate keys) and
+  O(1) path lookups; the merge avoids O(n²) sibling scans and skips nodes whose
+  section in THEIRS is byte-identical to BASE.
+* The CLI does not free the models before exiting (`mem::forget`): freeing
+  ~10⁶ small allocations took longer than the merge itself.
+
+End to end, `scenemerge diff` on 10k-node files takes ≈160 ms wall-clock and
+`scenemerge merge` ≈275 ms (including ≈75 ms process start-up under Git Bash and
+the re-validation of the merged file).
+
+## D13. Godot integration test (spec §8.6)
+
+* `tests/godot/check_load.gd` (a `SceneTree` script run with
+  `godot --headless --path P -s res://check_load.gd -- res://dir`; flags
+  verified in the 4.7 command-line docs) loads every file with
+  `ResourceLoader.load`, instantiates plain scenes and compares the number of
+  nodes owned by the scene root with the number of `[node]` sections — Godot
+  silently drops a node whose `parent=` does not exist, which a plain load would
+  not reveal.
+* Godot refuses to load a scene whose dependencies are missing, so
+  `prepare_project.py` creates stubs for every referenced resource (scripts
+  `extends Object`, which fits any node or resource; stub scenes; shaders;
+  `.tres` of a concrete type; PNG/SVG images that `godot --import` imports).
+* `merge_demo_project.py` merges *real* demo projects through `git merge`: one
+  branch renumbers every ext_resource id (as the editor does) and adds a node,
+  the other adds a different node. A line-based merge conflicts in practically
+  every scene; scenemerge must merge all of them cleanly, and Godot must load
+  and instantiate every merged scene.
+* Verified locally with Godot 4.7.2 (Windows): 27 clean merge cases + 44 scenes
+  and resources of 5 demo projects. CI runs the same on Linux with Godot 4.6.3
+  and 4.7.2.
+
 ---
 
 # Format notes (verified)

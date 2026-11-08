@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[ext_resource type="PackedScene" uid="uid://bbase00002" path="res://base.tscn" id="1_b"]
+
+[node name="Level" type="Node"]
+
+[node name="Base" parent="." instance=ExtResource("1_b")]
+
+[node name="Light" parent="Base/Lamp" index="0"]
+energy = 2.0
+
+[editable path="Base"]

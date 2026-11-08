@@ -203,6 +203,8 @@ pub struct SceneFile {
     pub resource_section: Option<usize>,
     /// Properties of `[resource]`.
     pub resource_props: Vec<Prop>,
+    /// Node path → index into `nodes`.
+    path_index: HashMap<String, usize>,
 }
 
 fn str_field(h: &Header, key: &str) -> Option<String> {
@@ -219,25 +221,27 @@ fn int_field(h: &Header, key: &str) -> Option<i64> {
 }
 
 fn props_of(section: &godot_text::Section) -> Vec<Prop> {
-    let mut out: Vec<Prop> = Vec::new();
-    let mut pos: HashMap<String, usize> = HashMap::new();
-    for p in section.properties() {
-        let prop = Prop {
+    // Duplicate keys are rare (the last one wins, as in Godot): find them
+    // first so that the common case does no hashing at all.
+    let all: Vec<&godot_text::Property> = section.properties().collect();
+    let has_duplicates = if all.len() <= 32 {
+        all.iter()
+            .enumerate()
+            .any(|(i, p)| all.iter().skip(i + 1).any(|q| q.key == p.key))
+    } else {
+        let mut seen = std::collections::HashSet::with_capacity(all.len());
+        !all.iter().all(|p| seen.insert(p.key.as_str()))
+    };
+    let mut out: Vec<Prop> = Vec::with_capacity(all.len());
+    for (i, p) in all.iter().enumerate() {
+        if has_duplicates && all.iter().skip(i + 1).any(|q| q.key == p.key) {
+            continue; // a later assignment overrides this one
+        }
+        out.push(Prop {
             key: p.key.clone(),
             value: p.value.clone(),
             raw: p.raw_value.clone(),
-        };
-        match pos.get(&p.key) {
-            Some(&i) => {
-                if let Some(slot) = out.get_mut(i) {
-                    *slot = prop;
-                }
-            }
-            None => {
-                pos.insert(p.key.clone(), out.len());
-                out.push(prop);
-            }
-        }
+        });
     }
     out
 }
@@ -342,6 +346,7 @@ impl SceneFile {
             editables: Vec::new(),
             resource_section: None,
             resource_props: Vec::new(),
+            path_index: HashMap::new(),
             doc: Document::default(),
         };
         let mut by_path: HashMap<String, usize> = HashMap::new();
@@ -518,6 +523,7 @@ impl SceneFile {
             ));
         }
         file.doc = doc;
+        file.path_index = by_path;
         Ok(file)
     }
 
@@ -533,7 +539,7 @@ impl SceneFile {
 
     /// Index of the node with path `path` (`.` is the root).
     pub fn node_by_path(&self, path: &str) -> Option<usize> {
-        self.nodes.iter().position(|n| n.path == path)
+        self.path_index.get(path).copied()
     }
 
     /// The line where section `section` starts.
@@ -559,6 +565,31 @@ impl SceneFile {
             .filter(|(_, n)| n.parent == ParentRef::Node(node))
             .map(|(i, _)| i)
             .collect()
+    }
+
+    /// Whether a node path (relative to the root) can exist at runtime: it
+    /// names a node of this file, or lies inside an instanced scene (the
+    /// scene is inherited, or a prefix of the path is an instance).
+    pub fn path_exists(&self, path: &str) -> bool {
+        if self.node_by_path(path).is_some()
+            || self.nodes.first().is_some_and(|n| n.instance.is_some())
+        {
+            return true;
+        }
+        let mut prefix = path;
+        loop {
+            if self
+                .node_by_path(prefix)
+                .and_then(|i| self.nodes.get(i))
+                .is_some_and(|m| m.instance.is_some())
+            {
+                return true;
+            }
+            match prefix.rfind('/') {
+                Some(k) => prefix = prefix.get(..k).unwrap_or(""),
+                None => return false,
+            }
+        }
     }
 
     /// Checks references and ordering rules that Godot enforces when loading.
@@ -650,13 +681,27 @@ impl SceneFile {
                 check_value(&p.value, rs, &mut issues);
             }
         }
+        // A scene needs a root; a parent outside this file must live inside an
+        // instanced scene (inherited scene, or a child of an instance).
+        if self.kind == FileKind::Scene && self.nodes.is_empty() {
+            issues.push(Issue {
+                line: line(0),
+                message: "The scene has no root node".into(),
+            });
+        }
+        for n in &self.nodes {
+            if let ParentRef::External(p) = &n.parent {
+                if !self.path_exists(p) {
+                    issues.push(Issue {
+                        line: line(n.section),
+                        message: format!("Parent node '{p}' of '{}' does not exist", n.name),
+                    });
+                }
+            }
+        }
         for c in &self.connections {
             for (end, path) in [("from", &c.from), ("to", &c.to)] {
-                let known = self.node_by_path(path).is_some()
-                    || self.nodes.iter().any(|n| {
-                        matches!(n.parent, ParentRef::External(_)) || n.instance.is_some()
-                    });
-                if !known {
+                if !self.path_exists(path) {
                     issues.push(Issue {
                         line: line(c.section),
                         message: format!(

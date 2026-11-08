@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Sprite2D"]
+modulate = Color(1, 0, 0, 1)
+centered = false
+flip_h = true

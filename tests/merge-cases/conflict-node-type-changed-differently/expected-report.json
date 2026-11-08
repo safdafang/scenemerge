@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "node_attribute",
+      "target": "node:Body",
+      "property": "type",
+      "base": "type=\"RigidBody2D\"",
+      "ours": "type=\"CharacterBody2D\"",
+      "theirs": "type=\"StaticBody2D\"",
+      "resolution": "markers",
+      "line": 5
+    }
+  ],
+  "resolutions": []
+}

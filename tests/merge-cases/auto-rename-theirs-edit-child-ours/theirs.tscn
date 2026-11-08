@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node3D"]
+
+[node name="Grunt" type="CharacterBody3D" parent="."]
+speed = 5.0
+
+[node name="Mesh" type="MeshInstance3D" parent="Grunt"]
+cast_shadow = 1

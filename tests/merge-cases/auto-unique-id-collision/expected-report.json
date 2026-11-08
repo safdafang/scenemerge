@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "clean": true,
+  "conflicts": [],
+  "resolutions": [
+    {
+      "kind": "unique_id",
+      "target": "node:Theirs",
+      "from": "777",
+      "to": "1767476396"
+    }
+  ]
+}

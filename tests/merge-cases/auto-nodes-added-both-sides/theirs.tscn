@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D"]
+
+[node name="Enemies" type="Node2D" parent="."]
+
+[node name="Items" type="Node2D" parent="."]
+
+[node name="Potion" type="Area2D" parent="Items"]
+position = Vector2(0, 50)
+
+[node name="Sprite" type="Sprite2D" parent="Items/Potion"]

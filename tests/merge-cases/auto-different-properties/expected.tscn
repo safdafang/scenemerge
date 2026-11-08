@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Player" type="CharacterBody3D"]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+fov = 90.0
+near = 0.1
+far = 500.0

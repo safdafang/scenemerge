@@ -21,3 +21,9 @@ scene-model.workspace = true
 scene-diff.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+proptest.workspace = true
+godot-text.workspace = true
+scene-diff.workspace = true

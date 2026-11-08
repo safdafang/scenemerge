@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[ext_resource type="PackedScene" uid="uid://bbase00002" path="res://base.tscn" id="1_b"]
+
+[node name="Level" type="Node"]
+process_mode = 3
+
+[node name="Base" parent="." instance=ExtResource("1_b")]

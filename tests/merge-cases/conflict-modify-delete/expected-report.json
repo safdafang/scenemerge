@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "delete_modify",
+      "target": "node:Spawner",
+      "base": "(present)",
+      "theirs": "(modified)",
+      "resolution": "markers",
+      "line": 5
+    }
+  ],
+  "resolutions": []
+}

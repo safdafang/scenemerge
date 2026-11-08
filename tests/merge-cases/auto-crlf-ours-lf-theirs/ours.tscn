@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node2D"]
+position = Vector2(1, 1)
+
+[node name="A" type="Node2D" parent="."]

@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="UI" type="Control"]
+theme_type_variation = &"Menu"
+
+[node name="Play" type="Button" parent="."]
+
+[connection signal="pressed" from="Play" to="." method="_on_play_pressed"]

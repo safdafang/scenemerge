@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node2D"]
+
+<<<<<<< ours
+[node name="Effect" type="GPUParticles2D" parent="."]
+=======
+[node name="Effect" type="CPUParticles2D" parent="."]
+>>>>>>> theirs
+<<<<<<< ours
+amount = 16
+=======
+amount = 32
+>>>>>>> theirs

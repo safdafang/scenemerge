@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "property",
+      "target": "node:Camera3D",
+      "property": "fov",
+      "base": "75.0",
+      "ours": "80.0",
+      "theirs": "90.0",
+      "resolution": "theirs"
+    }
+  ],
+  "resolutions": []
+}

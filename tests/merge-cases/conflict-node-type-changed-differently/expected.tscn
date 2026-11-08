@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node"]
+
+<<<<<<< ours
+[node name="Body" type="CharacterBody2D" parent="."]
+=======
+[node name="Body" type="StaticBody2D" parent="."]
+>>>>>>> theirs

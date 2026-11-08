@@ -148,3 +148,49 @@ are equal.
   ]
 }
 ```
+
+---
+
+## Conflict report
+
+Written by `scenemerge merge … --report FILE` (also when the merge is clean).
+
+```json
+{
+  "schema_version": 1,
+  "path": "scenes/player.tscn",
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "property",
+      "target": "node:Camera3D",
+      "property": "fov",
+      "base": "75.0",
+      "ours": "80.0",
+      "theirs": "90.0",
+      "resolution": "markers",
+      "line": 6
+    }
+  ],
+  "resolutions": [
+    {
+      "kind": "ext_resource_id",
+      "target": "ext_resource:res://blue.png",
+      "from": "2_xyz12",
+      "to": "3_2ih0w"
+    }
+  ]
+}
+```
+
+| field | meaning |
+|---|---|
+| `path` | the `--path` given (Git's `%P`), if any |
+| `clean` | `true` when there are no conflicts (exit code 0) |
+| `conflicts[].kind` | `property`, `node_attribute`, `rename`, `move`, `delete_modify`, `add_add`, `connection`, `ext_resource`, `header` |
+| `conflicts[].target` | `node:<path>` (path in OURS, `.` = root), `sub_resource:<id>`, `resource`, `connection:<signal>:<from>-><to>::<method>`, `ext_resource:<path>`, `header` |
+| `conflicts[].property` | the property, or the comma-separated header fields in conflict |
+| `base` / `ours` / `theirs` | value text on each side; absent = did not exist or was deleted; for `delete_modify` the modified side is `"(modified)"` |
+| `resolution` | `markers`, `ours` or `theirs` (the `--conflict` mode) |
+| `line` | 1-based line of the `<<<<<<<` marker in the output (markers mode only) |
+| `resolutions[]` | automatic adjustments: `kind` = `ext_resource_id`, `sub_resource_id` or `unique_id`, with `target`, `from` (the value in THEIRS) and `to` (the value written) |

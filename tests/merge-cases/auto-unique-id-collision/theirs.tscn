@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node" unique_id=1]
+
+[node name="Theirs" type="Node" parent="." unique_id=777]

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node2D"]
+
+[node name="Front" type="Sprite2D" parent="."]
+
+[node name="Back" type="Sprite2D" parent="."]
+
+[node name="Middle" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.5)

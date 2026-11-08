@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "property",
+      "target": "sub_resource:BoxShape3D_a",
+      "property": "size",
+      "base": "Vector3(1, 1, 1)",
+      "ours": "Vector3(2, 2, 2)",
+      "theirs": "Vector3(3, 3, 3)",
+      "resolution": "markers",
+      "line": 4
+    }
+  ],
+  "resolutions": []
+}

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node2D"]
+
+[node name="Timer" type="Timer" parent="."]
+<<<<<<< ours
+wait_time = 1.0
+=======
+wait_time = 3.0
+>>>>>>> theirs

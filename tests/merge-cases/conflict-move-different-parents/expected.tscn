@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D"]
+
+[node name="A" type="Node2D" parent="."]
+
+<<<<<<< ours
+[node name="Coin" type="Area2D" parent="A"]
+=======
+[node name="Coin" type="Area2D" parent="B"]
+>>>>>>> theirs
+
+[node name="B" type="Node2D" parent="."]

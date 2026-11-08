@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "ext_resource",
+      "target": "ext_resource:res://art/icon.png",
+      "property": "path",
+      "base": "path=\"res://icon.png\"",
+      "ours": "path=\"res://art/icon.png\"",
+      "theirs": "path=\"res://gfx/icon.png\"",
+      "resolution": "markers",
+      "line": 3
+    }
+  ],
+  "resolutions": []
+}

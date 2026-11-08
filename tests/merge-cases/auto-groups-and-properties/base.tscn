@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Root" type="Node"]
+
+[node name="Enemy" type="Node2D" parent="." groups=["enemies"]]
+hp = 10

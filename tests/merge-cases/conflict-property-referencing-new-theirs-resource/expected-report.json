@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "property",
+      "target": "node:.",
+      "property": "texture",
+      "ours": "ExtResource(\"1_o\")",
+      "theirs": "ExtResource(\"1_o\")",
+      "resolution": "markers",
+      "line": 7
+    }
+  ],
+  "resolutions": [
+    {
+      "kind": "ext_resource_id",
+      "target": "ext_resource:res://theirs.png",
+      "from": "1_o",
+      "to": "2_wbhu3"
+    }
+  ]
+}

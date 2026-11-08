@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "delete_modify",
+      "target": "node:Props",
+      "base": "(present)",
+      "theirs": "(modified)",
+      "resolution": "theirs"
+    }
+  ],
+  "resolutions": []
+}

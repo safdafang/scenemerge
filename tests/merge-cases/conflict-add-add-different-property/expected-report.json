@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "property",
+      "target": "node:Timer",
+      "property": "wait_time",
+      "ours": "1.0",
+      "theirs": "3.0",
+      "resolution": "markers",
+      "line": 6
+    }
+  ],
+  "resolutions": []
+}

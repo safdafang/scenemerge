@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "connection",
+      "target": "connection:pressed:Play->.::_on_play_pressed",
+      "property": "binds",
+      "base": "binds=(none)",
+      "ours": "binds=[1]",
+      "theirs": "binds=[2]",
+      "resolution": "markers",
+      "line": 7
+    }
+  ],
+  "resolutions": []
+}

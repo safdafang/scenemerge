@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+<<<<<<< ours
+[ext_resource type="Texture2D" uid="uid://bicon00009" path="res://art/icon.png" id="1_i"]
+=======
+[ext_resource type="Texture2D" uid="uid://bicon00009" path="res://gfx/icon.png" id="1_i"]
+>>>>>>> theirs
+
+[node name="Root" type="Sprite2D"]
+texture = ExtResource("1_i")

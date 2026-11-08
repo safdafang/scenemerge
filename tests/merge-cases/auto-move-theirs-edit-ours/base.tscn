@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D"]
+
+[node name="Pickups" type="Node2D" parent="."]
+
+[node name="Coin" type="Area2D" parent="Pickups"]
+value = 5
+
+[node name="Shape" type="CollisionShape2D" parent="Pickups/Coin"]

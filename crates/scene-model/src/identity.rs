@@ -177,8 +177,21 @@ impl Matching {
     }
 
     fn match_sub(&mut self, a: &SceneFile, b: &SceneFile, opts: &MatchOptions) {
-        // 1. Same id.
+        // 1. Same id. With duplicate ids the last definition is the one that
+        //    references resolve to (as in Godot), so those are paired first.
+        let mut effective: Vec<(usize, usize)> = self
+            .sub_ids_b
+            .iter()
+            .filter_map(|(id, &j)| self.sub_ids_a.get(id).map(|&i| (i, j)))
+            .collect();
+        effective.sort_unstable();
+        for (i, j) in effective {
+            self.link_sub(i, j);
+        }
         for (j, s) in b.sub_resources.iter().enumerate() {
+            if self.sub_b_to_a.get(j).copied().flatten().is_some() {
+                continue;
+            }
             if let Some(&i) = self.sub_ids_a.get(&s.id) {
                 if self.sub_a_to_b.get(i).copied().flatten().is_none() {
                     self.link_sub(i, j);

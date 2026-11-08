@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[node name="Level" type="Node2D"]
+
+<<<<<<< ours
+[node name="Props" type="Node2D" parent="."]
+
+[node name="Barrel" type="Sprite2D" parent="Props"]
+=======
+>>>>>>> theirs

@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://bcase000001"]
+
+[ext_resource type="Script" path="res://a.gd" id="1"]
+[ext_resource type="Texture2D" path="res://b.png" id="2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1"]
+atlas = ExtResource("2")
+
+[node name="Root" type="Node"]
+script = ExtResource("1")
+editor_description = "root"
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_1")

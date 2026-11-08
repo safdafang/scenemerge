@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "clean": false,
+  "conflicts": [
+    {
+      "kind": "rename",
+      "target": "node:Grunt",
+      "property": "name",
+      "base": "name=\"Enemy\"",
+      "ours": "name=\"Grunt\"",
+      "theirs": "name=\"Minion\"",
+      "resolution": "markers",
+      "line": 5
+    }
+  ],
+  "resolutions": []
+}

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[ext_resource type="Script" uid="uid://bscr000001" path="res://player.gd" id="1_eeeee"]
+[ext_resource type="Texture2D" uid="uid://btex000001" path="res://icon.svg" id="2_fffff"]
+
+[node name="Player" type="Sprite2D"]
+script = ExtResource("1_eeeee")
+texture = ExtResource("2_fffff")
+speed = 1.0
+offset = Vector2(4, 4)

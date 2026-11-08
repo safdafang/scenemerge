@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://bcase000001"]
+
+[sub_resource type="Gradient" id="Gradient_g1"]
+colors = PackedColorArray(1, 0, 0, 1, 0, 1, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_t1"]
+gradient = SubResource("Gradient_g1")
+
+[node name="Bar" type="TextureRect"]
+texture = SubResource("GradientTexture1D_t1")
+custom_minimum_size = Vector2(100, 8)
