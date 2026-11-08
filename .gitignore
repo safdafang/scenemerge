@@ -1,0 +1,8 @@
+/target
+**/*.rs.bk
+*.pending-snap
+*.snap.new
+/fuzz/target
+/fuzz/corpus
+/fuzz/artifacts
+/.godot-cache

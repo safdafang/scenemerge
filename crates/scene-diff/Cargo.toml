@@ -1,0 +1,22 @@
+[package]
+name = "scene-diff"
+description = "Semantic diff of Godot 4 scenes and resources"
+readme = "README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+godot-text.workspace = true
+scene-model.workspace = true
+serde.workspace = true
+serde_json.workspace = true
