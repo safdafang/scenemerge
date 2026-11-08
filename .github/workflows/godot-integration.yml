@@ -1,0 +1,67 @@
+name: Godot integration
+
+# Loads merge results with a real headless Godot (spec §8.6): the clean merge
+# cases, and real demo projects merged through `git merge` with scenemerge as
+# merge driver.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Pinned commit of godotengine/godot-demo-projects (same as tests/fixtures).
+  DEMO_PROJECTS_COMMIT: b761b4cd5718a7118f2c95eb55f181d0a5f004f1
+
+jobs:
+  godot:
+    name: Godot ${{ matrix.godot }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        godot: ["4.6.3", "4.7.2"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release -p scenemerge
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ matrix.godot }}-linux-x86_64
+      - name: Download Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSfL --retry 3 -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${{ matrix.godot }}-stable/Godot_v${{ matrix.godot }}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${{ matrix.godot }}-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - run: ~/godot/godot --headless --version
+
+      - name: Fetch demo projects
+        run: |
+          git init -q demos && cd demos
+          git remote add origin https://github.com/godotengine/godot-demo-projects.git
+          git fetch -q --depth 1 --filter=blob:none origin "$DEMO_PROJECTS_COMMIT"
+          git sparse-checkout set 2d/dodge_the_creeps 2d/platformer 3d/platformer gui/control_gallery 2d/role_playing_game
+          git checkout -q FETCH_HEAD
+      - name: git identity
+        run: |
+          git config --global user.name "CI"
+          git config --global user.email "ci@example.invalid"
+
+      - name: Load merge results in Godot
+        env:
+          GODOT: ~/godot/godot
+        run: GODOT="$HOME/godot/godot" bash tests/godot/run.sh "$PWD/demos"
