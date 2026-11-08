@@ -10,6 +10,11 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
 
+// Parsing allocates many small strings; mimalloc is markedly faster than the
+// system allocators (on Windows in particular). See DECISIONS.md (D12).
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 /// Semantic diff and three-way merge for Godot 4 scenes and resources (.tscn/.tres).
 #[derive(Debug, Parser)]
 #[command(name = "scenemerge", version, about, long_about = None)]

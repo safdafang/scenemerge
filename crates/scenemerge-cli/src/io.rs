@@ -46,7 +46,6 @@ pub fn empty_like(other: &SceneFile) -> SceneFile {
 }
 
 /// Writes `bytes` to `path` atomically when possible (temporary file + rename).
-#[allow(dead_code)] // used by `merge` (next milestone)
 pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
     let dir = path.parent().filter(|p| !p.as_os_str().is_empty());
     let tmp_name = format!(

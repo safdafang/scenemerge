@@ -74,8 +74,16 @@ fn load_pair(
     old_name: &Path,
     new_name: &Path,
 ) -> Result<(SceneFile, SceneFile, &'static str)> {
-    let a = load_optional(old, old_name)?;
-    let b = load_optional(new, new_name)?;
+    // Both files are parsed in parallel: parsing dominates the run time.
+    let (a, b) = std::thread::scope(|scope| {
+        let ha = scope.spawn(|| load_optional(old, old_name));
+        let b = load_optional(new, new_name);
+        let a = ha
+            .join()
+            .unwrap_or_else(|_| Err(anyhow::anyhow!("internal error while loading")));
+        (a, b)
+    });
+    let (a, b) = (a?, b?);
     Ok(match (a, b) {
         (Some(a), Some(b)) => (a, b, ""),
         (None, Some(b)) => (empty_like(&b), b, " (new file)"),
@@ -129,7 +137,10 @@ pub fn run(args: &DiffArgs) -> Result<u8> {
         }
     }
     out.flush()?;
-    Ok(u8::from(args.exit_code && !d.is_empty()))
+    let code = u8::from(args.exit_code && !d.is_empty());
+    // About to exit: skip freeing the models (see DECISIONS.md, D12).
+    std::mem::forget((a, b, d));
+    Ok(code)
 }
 
 pub fn textconv(file: &Path) -> Result<u8> {

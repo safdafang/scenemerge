@@ -241,7 +241,8 @@ pub fn install(args: &InstallArgs) -> Result<u8> {
     let scope = if args.global { "--global" } else { "--local" };
     let attrs = attributes_file(args.global)?;
     let cmd = self_command(args.command.as_deref());
-    let mut driver = format!("{cmd} merge %O %A %B -o %A --path %P --marker-size %L");
+    let mut driver =
+        format!("{cmd} merge %O %A %B -o %A --path %P --marker-size %L --on-error text");
     if git_version().is_some_and(|v| v >= (2, 44)) {
         // Conflict labels (branch names) are available since Git 2.44.
         driver.push_str(" --label-base %S --label-ours %X --label-theirs %Y");
