@@ -1,0 +1,38 @@
+name: Bug report
+description: A diff or merge is wrong, or a file is rejected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! A minimal scene that reproduces the problem is the most useful thing you can attach.
+  - type: input
+    id: version
+    attributes:
+      label: scenemerge version
+      description: Output of `scenemerge --version`
+    validations:
+      required: true
+  - type: input
+    id: godot
+    attributes:
+      label: Godot version that saved the files
+      placeholder: "4.7.2"
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command you ran, its full output, and what you expected instead.
+      render: console
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files
+      description: |
+        Attach the files (for merges: base, ours and theirs). `scenemerge check FILE` output helps for parse errors.

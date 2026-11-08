@@ -1,0 +1,106 @@
+name: Release
+
+# Builds scenemerge for every platform when a tag `v*` is pushed and publishes
+# a GitHub release with the archives, SHA-256 checksums and the CHANGELOG entry.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl # fully static
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-13
+          - target: aarch64-apple-darwin
+            os: macos-14
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: musl toolchain
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Build
+        shell: bash
+        env:
+          CC_x86_64_unknown_linux_musl: musl-gcc
+          RUSTFLAGS: ${{ contains(matrix.target, 'windows') && '-C target-feature=+crt-static' || '' }}
+        run: cargo build --release --locked -p scenemerge --target ${{ matrix.target }}
+      - name: Smoke test
+        shell: bash
+        run: |
+          bin=target/${{ matrix.target }}/release/scenemerge
+          [[ -f "$bin.exe" ]] && bin="$bin.exe"
+          "$bin" --version
+          "$bin" check tests/fixtures/demo -q
+      - name: Package
+        id: package
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          name="scenemerge-${version}-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          cp README.md README.ru.md LICENSE CHANGELOG.md "dist/$name/"
+          if [[ "${{ matrix.target }}" == *windows* ]]; then
+            cp target/${{ matrix.target }}/release/scenemerge.exe "dist/$name/"
+            (cd dist && 7z a -tzip "$name.zip" "$name" >/dev/null)
+            archive="dist/$name.zip"
+          else
+            cp target/${{ matrix.target }}/release/scenemerge "dist/$name/"
+            tar -C dist -czf "dist/$name.tar.gz" "$name"
+            archive="dist/$name.tar.gz"
+          fi
+          if command -v sha256sum >/dev/null; then sha256sum "$archive" > "$archive.sha256";
+          else shasum -a 256 "$archive" > "$archive.sha256"; fi
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.archive }}.sha256
+
+  release:
+    name: publish release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Release notes from CHANGELOG.md
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            /^## \[/ { if (found) exit; if (index($0, "[" v "]")) { found = 1; next } }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          test -s notes.md || echo "See CHANGELOG.md" > notes.md
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "scenemerge ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md
