@@ -1,0 +1,15 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: human
+---
+showcase
++ ext_resource res://enemies/boss.tscn (PackedScene)
+~ Player/Camera3D
+    transform.origin.y: 1 → 2.5
+    fov: 75.0 → 90.0
+✎ Enemies/Enemy renamed to Grunt
++ Enemies/Boss (instance of res://enemies/boss.tscn)
++ Coins (Node3D)
+→ Pickups/Coin moved to Coins/Coin
+- Enemies/OldSpawner (Node3D)
++ signal Player/Area3D.body_entered → Player._on_hit

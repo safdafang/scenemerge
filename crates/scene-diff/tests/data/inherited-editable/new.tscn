@@ -1,0 +1,14 @@
+[gd_scene format=4 uid="uid://binh0000001"]
+
+[ext_resource type="PackedScene" uid="uid://bbase000001" path="res://base.tscn" id="1_b"]
+
+[node name="Boss" unique_id=10 instance=ExtResource("1_b")]
+
+[node name="Sprite2D" parent="." index="1" unique_id=11]
+modulate = Color(1, 0, 0, 1)
+
+[node name="Gun" parent="Arm/Hand" parent_id_path=PackedInt32Array(3, 4) unique_id=12]
+damage = 5
+
+[editable path="Arm"]
+[editable path="Arm/Hand"]

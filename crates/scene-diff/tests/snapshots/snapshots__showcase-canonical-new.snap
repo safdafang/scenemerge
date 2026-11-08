@@ -1,0 +1,37 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: "canonical_text(&load(&dir, \"new\"))"
+---
+[gd_scene format=3 uid="uid://blevel00001"]
+
+[ext_resource type="PackedScene" uid="uid://bboss000001" path="res://enemies/boss.tscn"]
+[ext_resource type="PackedScene" uid="uid://bgrunt00001" path="res://enemies/grunt.tscn"]
+[ext_resource type="Script" uid="uid://bplayer0001" path="res://player.gd"]
+
+[node path="." name="Level" type="Node3D"]
+
+[node path="Player" name="Player" type="CharacterBody3D"]
+script = ExtResource("res://player.gd")
+
+[node path="Player/Camera3D" name="Camera3D" type="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+fov = 90.0
+
+[node path="Player/Area3D" name="Area3D" type="Area3D"]
+
+[node path="Enemies" name="Enemies" type="Node3D"]
+
+[node path="Enemies/Grunt" name="Grunt" instance=ExtResource("res://enemies/grunt.tscn")]
+health = 100
+speed = 3.0
+
+[node path="Enemies/Boss" name="Boss" instance=ExtResource("res://enemies/boss.tscn")]
+
+[node path="Pickups" name="Pickups" type="Node3D"]
+
+[node path="Coins" name="Coins" type="Node3D"]
+
+[node path="Coins/Coin" name="Coin" type="Area3D"]
+value = 5
+
+[connection signal="body_entered" from="Player/Area3D" to="Player" method="_on_hit"]

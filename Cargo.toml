@@ -37,6 +37,7 @@ insta = { version = "1.40", features = ["json"] }
 proptest = "1.5"
 criterion = { version = "0.5", default-features = false }
 tempfile = "3"
+similar = "2"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

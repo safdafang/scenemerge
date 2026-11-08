@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3 uid="uid://bnoise00001"]
+
+[ext_resource type="Script" uid="uid://bscript0001" path="res://main.gd" id="1_aaaaa"]
+[ext_resource type="Texture2D" uid="uid://btex0000001" path="res://icon.svg" id="2_bbbbb"]
+[ext_resource type="Texture2D" path="res://bg.png" id="3"]
+
+[sub_resource type="Gradient" id="Gradient_one"]
+offsets = PackedFloat32Array(0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_two"]
+gradient = SubResource("Gradient_one")
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_aaaaa")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("2_bbbbb")
+position = Vector2(10, 20)
+
+[node name="Bg" type="Sprite2D" parent="."]
+texture = ExtResource("3")
+material = SubResource("GradientTexture1D_two")
+self_modulate = Color(1, 1, 1, 0.5)

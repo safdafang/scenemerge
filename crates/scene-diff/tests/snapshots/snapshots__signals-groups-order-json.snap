@@ -1,0 +1,68 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: json
+---
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "old_path": "old",
+      "new_path": "new",
+      "changes": [
+        {
+          "kind": "NodeReordered",
+          "path": "Quit",
+          "old_position": 2,
+          "new_position": 0
+        },
+        {
+          "kind": "NodeRenamed",
+          "path": "Start",
+          "new_name": "Play",
+          "new_path": "Play"
+        },
+        {
+          "kind": "GroupsChanged",
+          "path": "Play",
+          "added": [
+            "main_menu"
+          ],
+          "removed": []
+        },
+        {
+          "kind": "ConnectionChanged",
+          "signal": "pressed",
+          "from": "Options",
+          "to": ".",
+          "method": "_on_options_pressed",
+          "changes": [
+            {
+              "field": "flags",
+              "old": "2",
+              "new": "6"
+            },
+            {
+              "field": "binds",
+              "old": "[1]",
+              "new": "[2]"
+            }
+          ]
+        },
+        {
+          "kind": "ConnectionAdded",
+          "signal": "mouse_entered",
+          "from": "Play",
+          "to": ".",
+          "method": "_on_hover"
+        },
+        {
+          "kind": "ConnectionRemoved",
+          "signal": "pressed",
+          "from": "Quit",
+          "to": ".",
+          "method": "_on_quit_pressed"
+        }
+      ]
+    }
+  ]
+}

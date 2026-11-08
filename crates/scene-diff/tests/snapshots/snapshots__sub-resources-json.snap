@@ -1,0 +1,71 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: json
+---
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "old_path": "old",
+      "new_path": "new",
+      "changes": [
+        {
+          "kind": "PropertyChanged",
+          "target": {
+            "kind": "sub_resource",
+            "id": "BoxShape3D_a",
+            "type": "BoxShape3D"
+          },
+          "property": "size",
+          "old": "Vector3(1, 1, 1)",
+          "new": "Vector3(2, 1, 2)",
+          "components": [
+            {
+              "name": "x",
+              "old": "1",
+              "new": "2"
+            },
+            {
+              "name": "z",
+              "old": "1",
+              "new": "2"
+            }
+          ]
+        },
+        {
+          "kind": "SubResourceAdded",
+          "id": "SphereShape3D_s",
+          "type": "SphereShape3D"
+        },
+        {
+          "kind": "SubResourceRemoved",
+          "id": "StandardMaterial3D_m",
+          "type": "StandardMaterial3D"
+        },
+        {
+          "kind": "PropertyAdded",
+          "target": {
+            "kind": "node",
+            "path": "."
+          },
+          "property": "gravity_scale",
+          "new": "0.5"
+        },
+        {
+          "kind": "PropertyRemoved",
+          "target": {
+            "kind": "node",
+            "path": "Mesh"
+          },
+          "property": "material_override",
+          "old": "SubResource(\"StandardMaterial3D_m\")"
+        },
+        {
+          "kind": "NodeAdded",
+          "path": "Sensor",
+          "type": "CollisionShape3D"
+        }
+      ]
+    }
+  ]
+}

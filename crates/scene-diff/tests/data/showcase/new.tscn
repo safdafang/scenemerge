@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://blevel00001"]
+
+[ext_resource type="Script" uid="uid://bplayer0001" path="res://player.gd" id="1_a2b3c"]
+[ext_resource type="PackedScene" uid="uid://bgrunt00001" path="res://enemies/grunt.tscn" id="2_d4e5f"]
+[ext_resource type="PackedScene" uid="uid://bboss000001" path="res://enemies/boss.tscn" id="3_g6h7i"]
+
+[node name="Level" type="Node3D"]
+
+[node name="Player" type="CharacterBody3D" parent="."]
+script = ExtResource("1_a2b3c")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+fov = 90.0
+
+[node name="Area3D" type="Area3D" parent="Player"]
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Grunt" parent="Enemies" instance=ExtResource("2_d4e5f")]
+health = 100
+speed = 3.0
+
+[node name="Boss" parent="Enemies" instance=ExtResource("3_g6h7i")]
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="Coins" type="Node3D" parent="."]
+
+[node name="Coin" type="Area3D" parent="Coins"]
+value = 5
+
+[connection signal="body_entered" from="Player/Area3D" to="Player" method="_on_hit"]

@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://blevel00001"]
+
+[ext_resource type="PackedScene" uid="uid://bgrunt00001" path="res://enemies/grunt.tscn" id="1_grunt"]
+[ext_resource type="Script" uid="uid://bplayer0001" path="res://player.gd" id="2_plr01"]
+
+[node name="Level" type="Node3D"]
+
+[node name="Player" type="CharacterBody3D" parent="."]
+script = ExtResource("2_plr01")
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+fov = 75.0
+
+[node name="Area3D" type="Area3D" parent="Player"]
+
+[node name="Enemies" type="Node3D" parent="."]
+
+[node name="Enemy" parent="Enemies" instance=ExtResource("1_grunt")]
+health = 100
+speed = 3.0
+
+[node name="OldSpawner" type="Node3D" parent="Enemies"]
+
+[node name="Pickups" type="Node3D" parent="."]
+
+[node name="Coin" type="Area3D" parent="Pickups"]
+value = 5

@@ -20,3 +20,8 @@ godot-text.workspace = true
 scene-model.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+anstyle.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+proptest.workspace = true

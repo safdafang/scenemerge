@@ -119,6 +119,64 @@ Implemented in `scene_model::Matching`:
    tokens naming the matched entity before values are compared, so id
    renumbering never shows up as a property change.
 
+## D8. What the diff reports and what it ignores
+
+* `unique_id`, `parent_id_path`, `owner_uid_path` (nodes) and `from_uid_path`,
+  `to_uid_path` (connections) are *identity*, not content. Opening and saving a
+  pre-4.6 project in Godot 4.6 adds a `unique_id` to every node; reporting that
+  would bury real changes. They are used for matching and kept by merges, but
+  never reported by `diff` and dropped from the `textconv` form.
+* Connection endpoints and `[editable]` paths of the old version are translated
+  through the node matching before comparison, so renaming a node does not
+  turn its connections into "removed + added".
+* `NodeAttributeChanged` (not in the brief's list) covers the remaining header
+  attributes (`owner`, `index`, `instance_placeholder`, `node_paths`, …) so that
+  nothing is silently dropped.
+* `SubResourceChanged` is emitted only for a type change; property changes of a
+  sub-resource are ordinary `Property*` changes with a `sub_resource` target.
+  This keeps one uniform shape for every property change in JSON.
+* Compound values are broken down into components (see `docs/json-schema.md`);
+  `Transform3D`'s translation is called `origin.*` (the engine's field name)
+  rather than `position.*` used in the brief's example, because `position` is a
+  property of `Node3D`, not a component of `Transform3D`.
+* `scenemerge diff` exits 0 even when there are differences (opt in with
+  `--exit-code`), because `GIT_EXTERNAL_DIFF`/`diff.<driver>.command`
+  programs must exit 0 unless `GIT_EXTERNAL_DIFF_TRUST_EXIT_CODE` is set
+  (verified in git(1)); `git-diff` honours that variable.
+
+## D9. Canonical text form for `textconv`
+
+`git diff` runs `textconv` on both sides and diffs the outputs line by line. The
+canonical form (`scene_diff::canonical_text`) therefore removes editor noise:
+ext-resource ids are replaced by paths, ext resources are sorted and lose their
+id, `load_steps`/`unique_id`/`*_id_path` are dropped, nodes carry their full
+`path=`, connections/editables are sorted, values are re-rendered in Godot's
+writer layout with canonical number spelling, LF only. Sub-resource ids and
+property order are kept: Godot preserves both across saves, and renumbering
+sub-resources canonically would turn one insertion into a cascade of changes.
+
+## D10. Git integration details (verified in gitattributes(5) and git(1))
+
+* Merge driver: `driver = scenemerge merge %O %A %B -o %A --path %P --marker-size %L`,
+  plus `--label-base %S --label-ours %X --label-theirs %Y` when Git ≥ 2.44
+  (those placeholders do not exist in older versions). The result must be left
+  in `%A`.
+* Git treats a driver exit status of 1..=128 as "conflicts" and > 128 as a
+  crash. The brief's "2 and above = error" therefore still marks the path as
+  conflicted in Git (it does not abort the merge); see the merge section for how
+  errors keep the user's data safe.
+* External diff: 7 arguments `path old-file old-hex old-mode new-file new-hex new-mode`,
+  `/dev/null` for a missing side, a single argument for unmerged paths. Git
+  also appends `new-path` and a rename header for renames (9 arguments); both
+  forms are accepted.
+* `install` writes the attribute lines once (idempotent, preserves the file's
+  line endings), sets `diff.godot-scene.textconv` (or `.command` with
+  `--diff semantic`) and `merge.godot-scene.{name,driver}`. If `scenemerge` is
+  not on `PATH`, the absolute path of the running executable is used, quoted
+  and with forward slashes because Git runs drivers through `sh` (also on Windows).
+* `--global` uses `core.attributesFile`, falling back to
+  `$XDG_CONFIG_HOME/git/attributes` or `~/.config/git/attributes` (Git's defaults).
+
 ---
 
 # Format notes (verified)

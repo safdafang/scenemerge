@@ -1,0 +1,11 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: human
+---
+inherited-editable
+~ file descriptor
+    format: 3 → 4
+~ Sprite2D
+    index: 0 → 1
++ Arm/Hand/Gun
++ editable Arm/Hand

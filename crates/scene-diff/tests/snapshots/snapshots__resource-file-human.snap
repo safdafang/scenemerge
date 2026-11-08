@@ -1,0 +1,12 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: human
+---
+resource-file
+~ ext_resource res://scripts/weapon.gd
+    path: res://weapon.gd → res://scripts/weapon.gd
+~ [resource]
+    damage: 10 → 12
+    tags[1]: "sharp" → "heavy"
+    stats["speed"]: 2 → 3
+    stats["weight"]: (none) → 8

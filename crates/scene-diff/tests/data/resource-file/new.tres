@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Weapon" format=3 uid="uid://bweapon0001"]
+
+[ext_resource type="Script" uid="uid://bwscript001" path="res://scripts/weapon.gd" id="1_w"]
+
+[resource]
+script = ExtResource("1_w")
+damage = 12
+tags = PackedStringArray("melee", "heavy")
+stats = {
+"range": 1.5,
+"speed": 3,
+"weight": 8
+}

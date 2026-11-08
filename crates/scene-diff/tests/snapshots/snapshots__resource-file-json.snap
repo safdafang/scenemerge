@@ -1,0 +1,71 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: json
+---
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "old_path": "old",
+      "new_path": "new",
+      "changes": [
+        {
+          "kind": "ExtResourceChanged",
+          "path": "res://scripts/weapon.gd",
+          "changes": [
+            {
+              "field": "path",
+              "old": "res://weapon.gd",
+              "new": "res://scripts/weapon.gd"
+            }
+          ]
+        },
+        {
+          "kind": "PropertyChanged",
+          "target": {
+            "kind": "resource"
+          },
+          "property": "damage",
+          "old": "10",
+          "new": "12"
+        },
+        {
+          "kind": "PropertyChanged",
+          "target": {
+            "kind": "resource"
+          },
+          "property": "tags",
+          "old": "PackedStringArray(\"melee\", \"sharp\")",
+          "new": "PackedStringArray(\"melee\", \"heavy\")",
+          "components": [
+            {
+              "name": "[1]",
+              "old": "\"sharp\"",
+              "new": "\"heavy\""
+            }
+          ]
+        },
+        {
+          "kind": "PropertyChanged",
+          "target": {
+            "kind": "resource"
+          },
+          "property": "stats",
+          "old": "{\n\"range\": 1.5,\n\"speed\": 2\n}",
+          "new": "{\n\"range\": 1.5,\n\"speed\": 3,\n\"weight\": 8\n}",
+          "components": [
+            {
+              "name": "[\"speed\"]",
+              "old": "2",
+              "new": "3"
+            },
+            {
+              "name": "[\"weight\"]",
+              "new": "8"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

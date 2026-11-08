@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://bsig0000001"]
+
+[node name="UI" type="Control" unique_id=1]
+
+[node name="Start" type="Button" parent="." unique_id=2 groups=["menu"]]
+
+[node name="Options" type="Button" parent="." unique_id=3]
+
+[node name="Quit" type="Button" parent="." unique_id=4]
+
+[connection signal="pressed" from="Start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Options" to="." method="_on_options_pressed" binds= [1]]

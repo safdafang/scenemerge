@@ -1,0 +1,15 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: human
+---
+sub-resources
+~ sub_resource BoxShape3D_a (BoxShape3D)
+    size.x: 1 → 2
+    size.z: 1 → 2
++ sub_resource SphereShape3D_s (SphereShape3D)
+- sub_resource StandardMaterial3D_m (StandardMaterial3D)
+~ Crate
+    + gravity_scale = 0.5
+~ Mesh
+    - material_override (was SubResource("StandardMaterial3D_m"))
++ Sensor (CollisionShape3D)

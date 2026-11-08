@@ -1,0 +1,81 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: json
+---
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "old_path": "old",
+      "new_path": "new",
+      "changes": [
+        {
+          "kind": "ExtResourceAdded",
+          "path": "res://enemies/boss.tscn",
+          "type": "PackedScene",
+          "uid": "uid://bboss000001"
+        },
+        {
+          "kind": "PropertyChanged",
+          "target": {
+            "kind": "node",
+            "path": "Player/Camera3D"
+          },
+          "property": "transform",
+          "old": "Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)",
+          "new": "Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)",
+          "components": [
+            {
+              "name": "origin.y",
+              "old": "1",
+              "new": "2.5"
+            }
+          ]
+        },
+        {
+          "kind": "PropertyChanged",
+          "target": {
+            "kind": "node",
+            "path": "Player/Camera3D"
+          },
+          "property": "fov",
+          "old": "75.0",
+          "new": "90.0"
+        },
+        {
+          "kind": "NodeRenamed",
+          "path": "Enemies/Enemy",
+          "new_name": "Grunt",
+          "new_path": "Enemies/Grunt"
+        },
+        {
+          "kind": "NodeAdded",
+          "path": "Enemies/Boss",
+          "instance": "res://enemies/boss.tscn"
+        },
+        {
+          "kind": "NodeAdded",
+          "path": "Coins",
+          "type": "Node3D"
+        },
+        {
+          "kind": "NodeMoved",
+          "path": "Pickups/Coin",
+          "new_path": "Coins/Coin"
+        },
+        {
+          "kind": "NodeRemoved",
+          "path": "Enemies/OldSpawner",
+          "type": "Node3D"
+        },
+        {
+          "kind": "ConnectionAdded",
+          "signal": "body_entered",
+          "from": "Player/Area3D",
+          "to": "Player",
+          "method": "_on_hit"
+        }
+      ]
+    }
+  ]
+}

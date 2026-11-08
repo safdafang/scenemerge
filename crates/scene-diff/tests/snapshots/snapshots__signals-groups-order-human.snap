@@ -1,0 +1,14 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: human
+---
+signals-groups-order
+~ Quit
+    position among siblings: 2 → 0
+✎ Start renamed to Play
+    groups: +main_menu
+~ signal Options.pressed → UI._on_options_pressed
+    flags: 2 → 6
+    binds: [1] → [2]
++ signal Play.mouse_entered → UI._on_hover
+- signal Quit.pressed → UI._on_quit_pressed

@@ -1,0 +1,36 @@
+---
+source: crates/scene-diff/tests/snapshots.rs
+expression: json
+---
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "old_path": "old",
+      "new_path": "new",
+      "changes": [
+        {
+          "kind": "HeaderChanged",
+          "field": "format",
+          "old": "3",
+          "new": "4"
+        },
+        {
+          "kind": "NodeAttributeChanged",
+          "path": "Sprite2D",
+          "field": "index",
+          "old": "0",
+          "new": "1"
+        },
+        {
+          "kind": "NodeAdded",
+          "path": "Arm/Hand/Gun"
+        },
+        {
+          "kind": "EditableAdded",
+          "path": "Arm/Hand"
+        }
+      ]
+    }
+  ]
+}
