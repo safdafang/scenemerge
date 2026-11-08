@@ -1,5 +1,3 @@
-//! File loading helpers.
-
 use std::path::Path;
 
 use anyhow::{Context, Result};
@@ -41,7 +39,6 @@ pub fn empty_like(other: &SceneFile) -> SceneFile {
                 .unwrap_or("Resource")
         ),
     };
-    // The literal above is always valid.
     SceneFile::parse(&text).unwrap_or_else(|_| other.clone())
 }
 
@@ -59,7 +56,6 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {
     };
     std::fs::write(&tmp, bytes).with_context(|| format!("cannot write {}", tmp.display()))?;
     if let Err(e) = std::fs::rename(&tmp, path) {
-        // Fall back to a direct write (e.g. cross-device or locked target on Windows).
         let _ = std::fs::remove_file(&tmp);
         std::fs::write(path, bytes)
             .with_context(|| format!("cannot write {} ({e})", path.display()))?;

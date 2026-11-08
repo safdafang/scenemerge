@@ -1,7 +1,3 @@
-//! Change types. The JSON form of these types is a stable, documented
-//! interface (`docs/json-schema.md`); add fields only in a backward-compatible
-//! way and bump [`crate::SCHEMA_VERSION`] for breaking changes.
-
 use serde::Serialize;
 
 /// The entity a property change applies to.

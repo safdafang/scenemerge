@@ -1,5 +1,3 @@
-//! `check` command: parse, validate and verify lossless round-trip.
-
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -90,7 +88,6 @@ pub fn run(args: &CheckArgs) -> Result<u8> {
         } else {
             bad += 1;
             for p in problems {
-                // "12: message" → "file:12: message"; other messages get a space.
                 let sep = if p.starts_with(|c: char| c.is_ascii_digit()) {
                     ":"
                 } else {

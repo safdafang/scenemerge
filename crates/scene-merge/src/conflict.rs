@@ -1,5 +1,3 @@
-//! Conflicts and the JSON conflict report.
-
 use serde::Serialize;
 
 /// How conflicts are written to the merged file.

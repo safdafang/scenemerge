@@ -1,6 +1,5 @@
-//! One test per identity rule of the specification (section 4).
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -31,8 +30,6 @@ fn prop<'a>(f: &'a SceneFile, path: &str, key: &str) -> &'a godot_text::Value {
         .unwrap()
         .value
 }
-
-// ---------------------------------------------------------------- ext_resource
 
 #[test]
 fn ext_resource_renumbering_is_invisible() {
@@ -87,7 +84,6 @@ script = ExtResource("7_abcde")
 
 #[test]
 fn ext_resource_uid_wins_over_path() {
-    // The file was moved: same uid, new path. It is the same resource.
     let a = scene(
         r#"[ext_resource type="Texture2D" uid="uid://tex" path="res://old/a.png" id="1_a"]
 [ext_resource type="Texture2D" uid="uid://other" path="res://new/a.png" id="2_b"]
@@ -126,8 +122,6 @@ texture = ExtResource("1")
     assert!(!m.values_equal(prop(&a, ".", "texture"), prop(&b, ".", "texture"), 0.0));
 }
 
-// ---------------------------------------------------------------- sub_resource
-
 #[test]
 fn sub_resource_matched_by_id() {
     let a = scene(
@@ -148,7 +142,6 @@ shape = SubResource("BoxShape3D_a")
     );
     let m = matching(&a, &b);
     assert_eq!(m.sub_a_to_b, vec![Some(0)]);
-    // The reference itself is unchanged even though the content changed.
     assert!(m.values_equal(prop(&a, ".", "shape"), prop(&b, ".", "shape"), 0.0));
 }
 
@@ -177,7 +170,6 @@ texture = SubResource("GradientTexture1D_new")
 "#,
     );
     let m = matching(&a, &b);
-    // Nested: the texture only matches because its gradient matched first.
     assert_eq!(m.sub_a_to_b, vec![Some(0), Some(1)]);
     assert!(m.values_equal(prop(&a, ".", "texture"), prop(&b, ".", "texture"), 0.0));
 }
@@ -201,8 +193,6 @@ size = Vector3(5, 1, 1)
     let m = matching(&a, &b);
     assert_eq!(m.sub_a_to_b, vec![None]);
 }
-
-// ----------------------------------------------------------------------- nodes
 
 #[test]
 fn nodes_matched_by_unique_id_across_rename_and_move() {
@@ -305,7 +295,6 @@ cast_shadow = 0
     let enemy = node(&a, "Enemy");
     assert_eq!(m.node_a_to_b[enemy], Some(node(&b, "Grunt")));
     assert!(matches!(m.node_how[enemy], Some(MatchHow::Heuristic(s)) if s >= 0.65));
-    // Children follow via the matched parent.
     assert_eq!(
         m.node_a_to_b[node(&a, "Enemy/Mesh")],
         Some(node(&b, "Grunt/Mesh"))
@@ -385,7 +374,6 @@ fn inherited_scene_nodes_with_external_parents() {
     let gun = node(&a, "Arm/Hand/Gun");
     assert_eq!(a.nodes[gun].parent, ParentRef::External("Arm/Hand".into()));
     assert!(a.nodes[0].instance.is_some());
-    // Without unique ids the override nodes still match by external path.
     let stripped = text
         .lines()
         .map(|l| {
@@ -412,8 +400,6 @@ fn inherited_scene_nodes_with_external_parents() {
         m.node_a_to_b
     );
 }
-
-// ------------------------------------------------------------- model & header
 
 #[test]
 fn descriptor_and_connections() {
@@ -510,7 +496,6 @@ fn all_fixtures_build_a_valid_model() {
                 .unwrap_or_else(|e| panic!("{}", e.with_path(&p)));
             let issues = f.validate();
             assert!(issues.is_empty(), "{}: {issues:?}", p.display());
-            // A file matched against itself is matched completely, by identity.
             let m = Matching::compute(&f, &f, &MatchOptions::default());
             assert!(
                 m.node_a_to_b.iter().enumerate().all(|(i, j)| *j == Some(i)),

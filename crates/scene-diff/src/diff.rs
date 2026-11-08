@@ -1,5 +1,3 @@
-//! Computing the semantic diff of two [`SceneFile`]s.
-
 use std::collections::{HashMap, HashSet};
 
 use godot_text::{RefKind, Value};
@@ -33,10 +31,6 @@ impl FileDiff {
     }
 }
 
-/// Node header fields that identify a node rather than describe it; they are
-/// not reported (see `DECISIONS.md`): `unique_id` is added to every node when a
-/// project is first saved with Godot 4.6, and the `*_id_path` fields are
-/// derived from the unique ids of nodes in instanced scenes.
 const IDENTITY_FIELDS: &[&str] = &["parent_id_path", "owner_uid_path"];
 const CONNECTION_IDENTITY_FIELDS: &[&str] = &["from_uid_path", "to_uid_path"];
 
@@ -135,10 +129,6 @@ impl Ctx<'_> {
         }
     }
 
-    /// Translates a node path of A (as used in connections/editables) into B's
-    /// naming, following renames and moves of the matched nodes. The longest
-    /// prefix naming a node of A is translated; the rest (a path inside an
-    /// instanced scene) is kept.
     fn translate_path(&self, path: &str) -> String {
         let mut end = path.len();
         loop {
@@ -497,9 +487,6 @@ fn same_parent(ctx: &Ctx<'_>, na: &Node, nb: &Node) -> bool {
     }
 }
 
-/// Finds siblings whose relative order changed. For every parent, the
-/// matched, non-moved children are compared in A order vs B order; children
-/// outside the longest increasing subsequence are reported as reordered.
 fn reorders(ctx: &Ctx<'_>, moved: &HashSet<usize>) -> HashMap<usize, (usize, usize)> {
     let mut by_parent_b: HashMap<ParentRef, Vec<usize>> = HashMap::new();
     for (j, nb) in ctx.b.nodes.iter().enumerate() {
@@ -511,7 +498,6 @@ fn reorders(ctx: &Ctx<'_>, moved: &HashSet<usize>) -> HashMap<usize, (usize, usi
     }
     let mut result = HashMap::new();
     for (parent_b, kids_b) in &by_parent_b {
-        // The corresponding parent in A.
         let parent_a = match parent_b {
             ParentRef::Node(pb) => match ctx.m.node_b_to_a.get(*pb).copied().flatten() {
                 Some(pa) => ParentRef::Node(pa),
@@ -522,7 +508,6 @@ fn reorders(ctx: &Ctx<'_>, moved: &HashSet<usize>) -> HashMap<usize, (usize, usi
         let Some(kids_a) = by_parent_a.get(&parent_a) else {
             continue;
         };
-        // Children present on both sides under the same parent.
         let common_b: Vec<usize> = kids_b
             .iter()
             .copied()
@@ -545,7 +530,6 @@ fn reorders(ctx: &Ctx<'_>, moved: &HashSet<usize>) -> HashMap<usize, (usize, usi
         for (a_pos, j) in seq.iter().enumerate() {
             let Some(&bp) = pos_b.get(j) else { continue };
             if !keep.contains(&bp) {
-                // Report positions among all siblings of each version.
                 let old_position = ctx
                     .m
                     .node_b_to_a
@@ -562,10 +546,8 @@ fn reorders(ctx: &Ctx<'_>, moved: &HashSet<usize>) -> HashMap<usize, (usize, usi
     result
 }
 
-/// Values of the longest strictly increasing subsequence of `seq`.
 fn lis(seq: &[usize]) -> HashSet<usize> {
-    // Patience sorting with predecessor links, O(n log n).
-    let mut tails: Vec<usize> = Vec::new(); // indices into seq
+    let mut tails: Vec<usize> = Vec::new();
     let mut prev: Vec<Option<usize>> = vec![None; seq.len()];
     for (i, &x) in seq.iter().enumerate() {
         let pos = tails.partition_point(|&t| seq.get(t).is_some_and(|&v| v < x));
@@ -601,8 +583,6 @@ fn connection_key(c: &Connection, from: String, to: String) -> ConnectionKey {
 }
 
 fn connections(ctx: &Ctx<'_>, out: &mut Vec<Change>) {
-    // Translate A's endpoints into B's naming so that renaming a node does not
-    // turn its connections into remove + add.
     let a_keys: Vec<ConnectionKey> = ctx
         .a
         .connections

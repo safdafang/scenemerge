@@ -17,7 +17,6 @@
 //! [node name="Player" type="Node2D"]
 //! script = ExtResource("1_aaaaa")
 //! "#)?;
-//! // Same scene, but the editor renumbered the ext_resource id.
 //! let b = SceneFile::parse(r#"[gd_scene format=3]
 //!
 //! [ext_resource type="Script" path="res://p.gd" id="2_bbbbb"]

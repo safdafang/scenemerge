@@ -14,8 +14,8 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT"
-repository = "https://github.com/OWNER/scenemerge"
-homepage = "https://github.com/OWNER/scenemerge"
+repository = "https://github.com/safdafang/scenemerge"
+homepage = "https://github.com/safdafang/scenemerge"
 authors = ["scenemerge contributors"]
 keywords = ["godot", "git", "merge", "diff", "gamedev"]
 categories = ["command-line-utilities", "development-tools", "game-development"]
@@ -55,7 +55,3 @@ lto = "thin"
 codegen-units = 1
 strip = true
 
-# The profile that 'dist' will build with
-[profile.dist]
-inherits = "release"
-lto = "thin"

@@ -1,6 +1,5 @@
-//! End-to-end: `scenemerge install` + `git diff` in a real repository.
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -26,8 +25,6 @@ fov = 75.0
 texture = ExtResource("2_bbbbb")
 "#;
 
-// The editor renumbered and reordered the ext resources and dropped
-// load_steps; the only real change is the camera's fov.
 const AFTER: &str = r#"[gd_scene format=3 uid="uid://bplayer0000"]
 
 [ext_resource type="Texture2D" uid="uid://bicon000000" path="res://icon.svg" id="1_qqqqq"]
@@ -71,7 +68,6 @@ fn install_is_idempotent_and_uninstall_cleans_up() {
     );
     let config = repo.git(&["config", "--local", "--get-regexp", "godot-scene"]);
 
-    // Second run: nothing changes, nothing is duplicated.
     let second = stdout(&repo.scenemerge(&["install", "--command", &exe()]));
     assert!(second.contains("already installed"), "{second}");
     assert_eq!(repo.read(".gitattributes"), attrs);
@@ -152,7 +148,6 @@ fn git_diff_with_semantic_external_driver() {
     let d = repo.git(&["diff", "player.tscn"]);
     assert_eq!(d, "player.tscn\n~ Camera3D\n    fov: 75.0 → 90.0\n", "{d}");
 
-    // New and deleted files are shown too (Git passes /dev/null).
     repo.write("enemy.tscn", BEFORE);
     repo.git(&["add", "-N", "enemy.tscn"]);
     let d = repo.git(&["diff", "enemy.tscn"]);
@@ -162,7 +157,6 @@ fn git_diff_with_semantic_external_driver() {
 
 #[test]
 fn git_external_diff_environment_variable() {
-    // Without any installation, GIT_EXTERNAL_DIFF alone also works.
     let repo = Repo::new();
     repo.write("player.tscn", BEFORE);
     repo.commit_all("add player");
@@ -203,7 +197,6 @@ fn git_external_diff_protocol_arguments() {
     ]);
     assert_eq!(out.status.code(), Some(0));
     assert!(stdout(&out).contains("fov: 75.0 → 90.0"));
-    // Rename form: 9 arguments, the 8th is the new path.
     let out = repo.scenemerge(&[
         "git-diff",
         "old.tscn",
@@ -217,7 +210,6 @@ fn git_external_diff_protocol_arguments() {
         "similarity index 90%\n",
     ]);
     assert!(stdout(&out).starts_with("old.tscn → new.tscn\n"));
-    // Unmerged path: a single argument.
     let out = repo.scenemerge(&["git-diff", "conflicted.tscn"]);
     assert_eq!(out.status.code(), Some(0));
 }

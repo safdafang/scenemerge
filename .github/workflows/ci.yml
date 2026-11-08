@@ -6,7 +6,6 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    # Weekly long fuzzing run (Monday 04:00 UTC).
     - cron: "0 4 * * 1"
 
 permissions:
@@ -46,12 +45,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      # Keep fixtures byte-exact on Windows (they are also marked -text in .gitattributes).
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      # git identity for the end-to-end git tests
       - run: |
           git config --global user.name "CI"
           git config --global user.email "ci@example.invalid"

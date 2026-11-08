@@ -60,7 +60,6 @@ pub fn merge(
         let parsed = SceneFile::parse(&out.text)
             .map_err(|e| MergeError::Internal(format!("merged output does not parse: {e}")))?;
         let issues = parsed.validate();
-        // Problems that were already present in OURS are not the merge's fault.
         let ours_issues = ours.validate();
         let new: Vec<_> = issues
             .iter()

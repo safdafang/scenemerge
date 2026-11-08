@@ -1,5 +1,3 @@
-//! The Variant value AST.
-
 use std::fmt::{self, Write as _};
 
 /// A numeric literal. The original spelling is kept so that values can be
@@ -68,8 +66,6 @@ impl Number {
     }
 }
 
-/// Parses the longest valid float prefix, like Godot's `String::to_float`
-/// does for slightly malformed literals such as `1e` or `1.`.
 fn parse_float_prefix(s: &str) -> f64 {
     if let Ok(v) = s.parse::<f64>() {
         return v;
@@ -119,11 +115,11 @@ pub enum Value {
         /// Arguments.
         args: Vec<Value>,
     },
-    /// `ExtResource("id")` — reference to an `[ext_resource]` by local id.
+    /// `ExtResource("id")`: reference to an `[ext_resource]` by local id.
     ExtResource(String),
-    /// `SubResource("id")` — reference to a `[sub_resource]` by local id.
+    /// `SubResource("id")`: reference to a `[sub_resource]` by local id.
     SubResource(String),
-    /// `Resource("uid://...", "res://...")` — direct reference by uid and/or path.
+    /// `Resource("uid://...", "res://...")`: direct reference by uid and/or path.
     Resource(Vec<String>),
     /// `[a, b, ...]`
     Array(Vec<Value>),
@@ -183,7 +179,6 @@ impl Value {
                 canonical_construct_name(n1) == canonical_construct_name(n2)
                     && a1.len() == a2.len()
                     && a1.iter().zip(a2).all(|(x, y)| match (x, y) {
-                        // Constructor arguments are all reals/ints: `1` == `1.0`.
                         (Number(p), Number(q)) => p.approx_eq(q, epsilon),
                         _ => x.semantic_eq(y, epsilon),
                     })
@@ -377,7 +372,6 @@ fn dict_eq(a: &[(Value, Value)], b: &[(Value, Value)], eps: f64) -> bool {
     if a.len() != b.len() {
         return false;
     }
-    // Fast path: same order.
     if a.iter()
         .zip(b)
         .all(|((k1, v1), (k2, v2))| k1.semantic_eq(k2, eps) && v1.semantic_eq(v2, eps))
@@ -456,8 +450,6 @@ fn write_list(f: &mut fmt::Formatter<'_>, items: &[Value]) -> fmt::Result {
     Ok(())
 }
 
-/// Writes the value in Godot's text syntax (following `VariantWriter`),
-/// reusing the original spelling of numbers.
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -537,7 +529,6 @@ mod tests {
         assert!(n("nan").approx_eq(&n("nan"), 0.0));
         assert!(!n("1.0").approx_eq(&n("1.001"), 0.0));
         assert!(n("1.0").approx_eq(&n("1.001"), 0.01));
-        // int vs float differ as values, but not as constructor args
         let int = Value::Number(n("1"));
         let float = Value::Number(n("1.0"));
         assert!(!int.semantic_eq(&float, 0.0));

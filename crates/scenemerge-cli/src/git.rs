@@ -1,5 +1,3 @@
-//! `install` / `uninstall`: register scenemerge as Git diff and merge driver.
-
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -59,7 +57,6 @@ fn git(args: &[&str]) -> Result<String> {
     Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
 }
 
-/// `git config` getter that returns `None` for unset keys.
 fn git_config_get(scope: &str, key: &str) -> Option<String> {
     Command::new("git")
         .args(["config", scope, "--get", key])
@@ -82,9 +79,6 @@ fn expand_tilde(p: &str) -> PathBuf {
     }
 }
 
-/// The attributes file to edit: `<repo>/.gitattributes`, or the global
-/// attributes file (`core.attributesFile`, default `$XDG_CONFIG_HOME/git/attributes`
-/// or `~/.config/git/attributes`).
 fn attributes_file(global: bool) -> Result<PathBuf> {
     if !global {
         let root = git(&["rev-parse", "--show-toplevel"])
@@ -114,7 +108,6 @@ fn on_path(exe: &str) -> bool {
     std::env::split_paths(&paths).any(|dir| names.iter().any(|n| dir.join(n).is_file()))
 }
 
-/// The command Git should run for scenemerge.
 fn self_command(explicit: Option<&str>) -> String {
     if let Some(c) = explicit {
         return c.to_string();
@@ -124,7 +117,6 @@ fn self_command(explicit: Option<&str>) -> String {
     }
     match std::env::current_exe() {
         Ok(p) => {
-            // Git runs drivers through a POSIX shell, also on Windows.
             let s = p.display().to_string().replace('\\', "/");
             format!("\"{s}\"")
         }
@@ -146,7 +138,6 @@ fn attribute_lines() -> Vec<String> {
         .collect()
 }
 
-/// Adds the attribute lines that are missing. Returns whether the file changed.
 fn add_attributes(path: &Path) -> Result<bool> {
     let existing = match std::fs::read_to_string(path) {
         Ok(s) => s,
@@ -188,7 +179,6 @@ fn add_attributes(path: &Path) -> Result<bool> {
     Ok(true)
 }
 
-/// Removes our attribute lines and comment. Returns whether the file changed.
 fn remove_attributes(path: &Path) -> Result<bool> {
     let Ok(existing) = std::fs::read_to_string(path) else {
         return Ok(false);
@@ -209,7 +199,6 @@ fn remove_attributes(path: &Path) -> Result<bool> {
     if kept.len() == existing.lines().count() {
         return Ok(false);
     }
-    // Drop trailing blank lines left behind by our block.
     let mut kept = kept;
     while kept.last().is_some_and(|l| l.trim().is_empty()) {
         kept.pop();
@@ -244,12 +233,14 @@ pub fn install(args: &InstallArgs) -> Result<u8> {
     let mut driver =
         format!("{cmd} merge %O %A %B -o %A --path %P --marker-size %L --on-error text");
     if git_version().is_some_and(|v| v >= (2, 44)) {
-        // Conflict labels (branch names) are available since Git 2.44.
         driver.push_str(" --label-base %S --label-ours %X --label-theirs %Y");
     }
     let mut changed = Vec::new();
     if add_attributes(&attrs)? {
-        changed.push(format!("updated {}", attrs.display()));
+        changed.push(format!(
+            "updated {}",
+            attrs.display().to_string().replace('\\', "/")
+        ));
     }
     let diff_key = format!("diff.{DRIVER}.textconv");
     let cmd_key = format!("diff.{DRIVER}.command");
@@ -303,7 +294,10 @@ pub fn uninstall(args: &UninstallArgs) -> Result<u8> {
     let attrs = attributes_file(args.global)?;
     let mut changed = Vec::new();
     if remove_attributes(&attrs)? {
-        changed.push(format!("updated {}", attrs.display()));
+        changed.push(format!(
+            "updated {}",
+            attrs.display().to_string().replace('\\', "/")
+        ));
     }
     for section in [format!("diff.{DRIVER}"), format!("merge.{DRIVER}")] {
         let ok = Command::new("git")

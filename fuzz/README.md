@@ -11,9 +11,9 @@ cargo +nightly fuzz run model -- -max_total_time=600
 
 Targets:
 
-* `parse` — `godot_text::Document::parse_bytes` never panics, and every accepted
+* `parse`: `godot_text::Document::parse_bytes` never panics, and every accepted
   input is written back byte for byte.
-* `model` — building the semantic model, diffing and merging never panic; a
+* `model`: building the semantic model, diffing and merging never panic; a
   file never differs from itself; merging valid inputs never fails.
 
 On platforms without libFuzzer support there is a stable-Rust mutation fuzzer

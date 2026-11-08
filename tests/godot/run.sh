@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
-# Loads merge results in a real headless Godot.
-#
-#   GODOT=/path/to/godot tests/godot/run.sh [DEMO_PROJECTS_DIR]
-#
-# 1. Every clean merge case in tests/merge-cases is loaded (and instantiated)
-#    by Godot's ResourceLoader inside a generated project with stub dependencies.
-# 2. If DEMO_PROJECTS_DIR (a checkout of godotengine/godot-demo-projects) is
-#    given, a few real projects are merged through `git merge` with scenemerge
-#    as merge driver, imported and loaded.
+# Usage: GODOT=/path/to/godot tests/godot/run.sh [GODOT_DEMO_PROJECTS_DIR]
 set -euo pipefail
 
 : "${GODOT:?set GODOT to the Godot 4 executable}"
@@ -20,7 +12,6 @@ DEMOS=("2d/dodge_the_creeps" "2d/platformer" "3d/platformer" "gui/control_galler
 check() {
   local project="$1" dir="$2"
   cp "$ROOT/tests/godot/check_load.gd" "$project/"
-  # --import exits non-zero on some harmless warnings; the load check decides.
   "$GODOT" --headless --path "$project" --import >"$WORK/import.log" 2>&1 || true
   "$GODOT" --headless --path "$project" -s res://check_load.gd -- "$dir"
 }

@@ -1,7 +1,7 @@
 # Contributing to scenemerge
 
 Thanks for helping! The most valuable contributions are **bug reports with a
-small scene that reproduces the problem** — ideally the three files of a merge
+small scene that reproduces the problem**, ideally the three files of a merge
 (base, ours, theirs) or the two files of a diff.
 
 ## Reporting bugs
@@ -14,7 +14,7 @@ Please include:
   game are fine if you can share them).
 
 If a file fails to parse, `scenemerge check FILE` prints the exact line and
-column — that line is usually all we need.
+column. That line is usually all we need.
 
 ## Building and testing
 
@@ -56,7 +56,7 @@ cargo bench -p scene-diff
 | `tests/fixtures` | real and synthetic `.tscn`/`.tres` files (byte-exact, `-text`) |
 | `tests/merge-cases` | merge scenarios: `base`, `ours`, `theirs`, `expected`, `expected-report.json` |
 | `tests/godot` | headless-Godot integration |
-| `DECISIONS.md` | design decisions and verified format details — read this first |
+| `DECISIONS.md` | design decisions and verified format details (read this first) |
 
 ## Adding a merge scenario
 
@@ -64,7 +64,7 @@ cargo bench -p scene-diff
    `theirs.tscn` (and optionally `options.txt` with `conflict=ours|theirs`).
 2. Run `SCENEMERGE_BLESS=1 cargo test -p scene-merge --test merge_cases`.
 3. **Review** the generated `expected.tscn` and `expected-report.json`
-   line by line — they become the specification.
+   line by line: they define the expected behaviour.
 
 Snapshot tests of the diff output use [insta](https://insta.rs):
 `cargo insta review` (or `INSTA_UPDATE=always cargo test`) after a deliberate

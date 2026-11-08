@@ -1,15 +1,3 @@
-//! Tokenizer that mirrors `VariantParser::get_token` from Godot
-//! (`core/variant/variant_parser.cpp`).
-//!
-//! Notable behaviours copied from Godot:
-//! * every character `<= U+0020` is whitespace;
-//! * `;` starts a comment anywhere outside a string and runs to the end of the line;
-//! * strings may span several lines; `\b \t \n \f \r \uXXXX \UXXXXXX` are escapes and
-//!   any other escaped character stands for itself;
-//! * `&"..."` (and the 3.x `@"..."`) is a `StringName`;
-//! * `#rrggbb` is a colour literal;
-//! * a leading `-` is part of a number or of an identifier (`-inf`).
-
 use crate::error::ParseError;
 
 /// Punctuation tokens.
@@ -208,8 +196,6 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Consumes the rest of a number whose first digit was already consumed.
-    /// Mirrors the READING_INT / READING_DEC / READING_EXP state machine.
     fn lex_number_tail(&mut self) {
         #[derive(PartialEq)]
         enum St {
@@ -264,7 +250,6 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    /// Lexes a string body after the opening quote and decodes escapes.
     fn lex_string_body(&mut self, start: usize) -> Result<String, ParseError> {
         let mut out = String::new();
         let mut lead_surrogate: Option<u32> = None;
@@ -400,7 +385,6 @@ mod tests {
                 TokKind::StrName("name".to_string())
             ]
         );
-        // Unknown escapes stand for themselves, strings may span lines.
         assert_eq!(
             kinds("\"x\\qy\nz\""),
             vec![TokKind::Str("xqy\nz".to_string())]

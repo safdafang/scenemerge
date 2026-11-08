@@ -1,6 +1,5 @@
-//! End-to-end: `scenemerge install` + `git merge` / `git rebase` in a real repository.
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -28,8 +27,6 @@ zoom = Vector2(1, 1)
 position = Vector2(100, 0)
 "#;
 
-/// Branch "feature": the editor renumbered the ext resources, the camera zoom
-/// changed and a second enemy was added.
 const FEATURE: &str = r#"[gd_scene format=3 uid="uid://blevel00000"]
 
 [ext_resource type="PackedScene" uid="uid://benemy00000" path="res://enemy.tscn" id="1_xxxxx"]
@@ -50,8 +47,6 @@ position = Vector2(100, 0)
 position = Vector2(200, 0)
 "#;
 
-/// Branch "main": a HUD texture was added (a new ext resource) and the first
-/// enemy moved.
 const MAIN: &str = r#"[gd_scene load_steps=4 format=3 uid="uid://blevel00000"]
 
 [ext_resource type="Script" uid="uid://bscript0000" path="res://level.gd" id="1_aaaaa"]
@@ -108,7 +103,6 @@ fn assert_merged(text: &str) {
 
 #[test]
 fn plain_git_would_conflict_but_scenemerge_merges() {
-    // Without the driver, Git's line merge conflicts on this history.
     let plain = Repo::new();
     plain.write("level.tscn", BASE);
     plain.commit_all("base");
@@ -124,7 +118,6 @@ fn plain_git_would_conflict_but_scenemerge_merges() {
         "expected a textual conflict without scenemerge"
     );
 
-    // With the driver the same merge is clean.
     let repo = Repo::new();
     setup(&repo);
     let out = repo.run("git", &["merge", "--no-edit", "feature"]);
@@ -136,9 +129,7 @@ fn plain_git_would_conflict_but_scenemerge_merges() {
     );
     let merged = repo.read("level.tscn");
     assert_merged(&merged);
-    // The result keeps "ours" (main) ids, so the diff against main is minimal.
     assert!(merged.contains("id=\"3_ccccc\""), "{merged}");
-    // 3 resources, as in main already: load_steps stays 4.
     assert!(merged.contains("load_steps=4"), "{merged}");
 }
 
@@ -161,7 +152,6 @@ fn git_rebase_uses_the_driver_too() {
 fn real_conflict_leaves_property_level_markers() {
     let repo = Repo::new();
     setup(&repo);
-    // Make "main" also change the zoom, differently.
     repo.write(
         "level.tscn",
         &MAIN.replace("zoom = Vector2(1, 1)", "zoom = Vector2(3, 3)"),
@@ -175,11 +165,9 @@ fn real_conflict_leaves_property_level_markers() {
         "{stderr}"
     );
     let text = repo.read("level.tscn");
-    // Only the zoom line is in conflict; everything else merged.
     let markers: Vec<&str> = text.lines().filter(|l| l.starts_with("<<<<<<<")).collect();
     assert_eq!(markers.len(), 1, "{text}");
     assert!(
-        // Git >= 2.44 passes its labels (%X/%Y); older versions get the defaults.
         text.contains(
             "<<<<<<< HEAD\nzoom = Vector2(3, 3)\n=======\nzoom = Vector2(2, 2)\n>>>>>>> feature\n"
         ) || text.contains(
@@ -188,7 +176,6 @@ fn real_conflict_leaves_property_level_markers() {
         "{text}"
     );
     assert!(text.contains("[node name=\"Enemy2\""), "{text}");
-    // Git knows the file is unmerged.
     let status = repo.git(&["status", "--porcelain"]);
     assert!(status.contains("UU level.tscn"), "{status}");
 }

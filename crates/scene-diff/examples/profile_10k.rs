@@ -1,5 +1,3 @@
-//! Prints the time of each phase of a 10k-node diff (development aid;
-//! uses the benchmark's generator and allocator).
 #![allow(missing_docs, clippy::unwrap_used)]
 #[path = "../benches/diff_10k.rs"]
 #[allow(dead_code)]

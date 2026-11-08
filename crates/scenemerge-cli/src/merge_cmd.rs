@@ -1,6 +1,3 @@
-//! `merge` command — also the Git merge driver
-//! (`scenemerge merge %O %A %B -o %A --path %P --marker-size %L`).
-
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -98,14 +95,12 @@ pub fn run(args: &MergeArgs) -> Result<u8> {
 fn semantic_merge(args: &MergeArgs) -> Result<u8> {
     let name = display_name(args);
     let shown = |p: &Path, side: &str| -> PathBuf {
-        // Git passes temporary files; name them after the real path.
         if args.path.is_some() {
             PathBuf::from(format!("{name} ({side})"))
         } else {
             p.to_path_buf()
         }
     };
-    // The three versions are parsed in parallel.
     let (base, ours, theirs) = std::thread::scope(|scope| {
         let failed = || Err(anyhow::anyhow!("internal error while loading"));
         let hb = scope.spawn(|| load(&args.base, &shown(&args.base, &args.label_base)));
@@ -176,8 +171,8 @@ fn semantic_merge(args: &MergeArgs) -> Result<u8> {
             let at = c.line.map(|l| format!(" at line {l}")).unwrap_or_default();
             let resolved = match c.resolution {
                 ConflictStyle::Markers => String::new(),
-                ConflictStyle::Ours => " — kept ours".into(),
-                ConflictStyle::Theirs => " — took theirs".into(),
+                ConflictStyle::Ours => " (kept ours)".into(),
+                ConflictStyle::Theirs => " (took theirs)".into(),
             };
             let kind = serde_json::to_value(&c.kind)
                 .ok()
@@ -198,13 +193,10 @@ fn semantic_merge(args: &MergeArgs) -> Result<u8> {
         }
     }
     let code = u8::from(!out.is_clean());
-    // The process is about to exit: let the OS reclaim the (large) models
-    // instead of freeing them node by node (see DECISIONS.md, D12).
     std::mem::forget((base, ours, theirs, out));
     Ok(code)
 }
 
-/// Line-based fallback: `git merge-file -p OURS BASE THEIRS`.
 fn text_merge(args: &MergeArgs) -> Result<u8> {
     let out = Command::new("git")
         .arg("merge-file")
@@ -223,7 +215,6 @@ fn text_merge(args: &MergeArgs) -> Result<u8> {
         .arg(&args.theirs)
         .output()
         .context("cannot run `git merge-file` for the line-based fallback")?;
-    // Exit status: number of conflicts (0 = clean), negative on error.
     let code = out.status.code().unwrap_or(-1);
     if !(0..=127).contains(&code) {
         anyhow::bail!(

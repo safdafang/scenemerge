@@ -1,23 +1,3 @@
-//! Identity matching between two versions of a file, and normalisation of
-//! values so that they can be compared across versions.
-//!
-//! Rules (see the repository's `DECISIONS.md`):
-//!
-//! * **ext_resource**: same `uid`; otherwise same `path`. The local `id` is
-//!   only a label inside one file, so renumbering is invisible.
-//! * **sub_resource**: same `id`; otherwise same `type` and equal normalised
-//!   content.
-//! * **node**: same `unique_id` (when present on both sides and unique);
-//!   otherwise same name under the matched parent (i.e. same path, but robust to
-//!   an ancestor being renamed); otherwise the rename/move heuristic: same
-//!   `type` and `instance` and a similarity score at or above
-//!   [`MatchOptions::rename_threshold`].
-//!
-//! Values are normalised by replacing every `ExtResource("id")` /
-//! `SubResource("id")` with a token naming the *matched entity*, so that
-//! `ExtResource("1_abc")` in one version equals `ExtResource("3_xyz")` in the
-//! other when both refer to the same file.
-
 use std::collections::HashMap;
 
 use godot_text::{RefKind, Value};
@@ -87,7 +67,6 @@ pub enum Side {
 }
 
 fn id_index<'a>(ids: impl Iterator<Item = &'a str>) -> HashMap<String, usize> {
-    // Later definitions win, as in Godot's loader.
     ids.enumerate().map(|(i, id)| (id.to_string(), i)).collect()
 }
 
@@ -177,8 +156,6 @@ impl Matching {
     }
 
     fn match_sub(&mut self, a: &SceneFile, b: &SceneFile, opts: &MatchOptions) {
-        // 1. Same id. With duplicate ids the last definition is the one that
-        //    references resolve to (as in Godot), so those are paired first.
         let mut effective: Vec<(usize, usize)> = self
             .sub_ids_b
             .iter()
@@ -198,8 +175,6 @@ impl Matching {
                 }
             }
         }
-        // 2. Same type and equal normalised content (in file order, so that
-        //    references to earlier sub-resources are already resolved).
         for (j, s) in b.sub_resources.iter().enumerate() {
             if self.sub_b_to_a.get(j).copied().flatten().is_some() {
                 continue;
@@ -268,14 +243,11 @@ impl Matching {
     }
 
     fn match_nodes(&mut self, a: &SceneFile, b: &SceneFile, opts: &MatchOptions) {
-        // 1. unique_id, when unique on both sides.
         let uid_index = |f: &SceneFile| {
             let mut map: HashMap<i64, Option<usize>> = HashMap::new();
             for (i, n) in f.nodes.iter().enumerate() {
                 if let Some(u) = n.unique_id {
-                    map.entry(u)
-                        .and_modify(|e| *e = None) // duplicate → unusable
-                        .or_insert(Some(i));
+                    map.entry(u).and_modify(|e| *e = None).or_insert(Some(i));
                 }
             }
             map
@@ -287,7 +259,6 @@ impl Matching {
                 self.link_node(*i, *j, MatchHow::UniqueId);
             }
         }
-        // 2. The roots always correspond.
         if let (Some(_), Some(_)) = (a.nodes.first(), b.nodes.first()) {
             if self.node_a_to_b.first().copied().flatten().is_none()
                 && self.node_b_to_a.first().copied().flatten().is_none()
@@ -295,7 +266,6 @@ impl Matching {
                 self.link_node(0, 0, MatchHow::Path);
             }
         }
-        // 3./4. Alternate the path pass and the heuristic until stable.
         for _round in 0..8 {
             self.path_pass(a, b);
             if self.heuristic_pass(a, b, opts, true) > 0 {
@@ -307,7 +277,6 @@ impl Matching {
         }
     }
 
-    /// Key of a node's parent in B's coordinates, for path matching.
     fn parent_key_in_b(&self, parent: &ParentRef) -> Option<ParentKey> {
         match parent {
             ParentRef::None => None,
@@ -334,7 +303,6 @@ impl Matching {
             };
             index.insert((key, n.name.as_str()), j);
         }
-        // A is in file order, so parents are matched before their children.
         for (i, n) in a.nodes.iter().enumerate() {
             if self.node_a_to_b.get(i).copied().flatten().is_some() {
                 continue;
@@ -348,9 +316,6 @@ impl Matching {
         }
     }
 
-    /// Matches remaining nodes by similarity. With `frontier_only`, only pairs
-    /// whose parents are both already matched (renames, moves between existing
-    /// parents) are considered. Returns the number of new matches.
     fn heuristic_pass(
         &mut self,
         a: &SceneFile,
@@ -381,7 +346,6 @@ impl Matching {
         if removed.is_empty() || added.is_empty() {
             return 0;
         }
-        // Bucket by (type, instance) to keep the pair count low.
         let bucket_key = |m: &Matching, side: Side, n: &Node| {
             let inst = n
                 .instance
@@ -425,7 +389,6 @@ impl Matching {
                 }
             }
         }
-        // Greedy, best score first; ties broken by file order for determinism.
         pairs.sort_by(|x, y| {
             y.0.partial_cmp(&x.0)
                 .unwrap_or(std::cmp::Ordering::Equal)
@@ -444,10 +407,6 @@ impl Matching {
         made
     }
 
-    /// Similarity of node `na` (A) and `nb` (B) in `0..=1`:
-    /// `0.6 * content + 0.25 * same parent + 0.15 * same name`, where content
-    /// combines property similarity (same value 1, same key 0.5) and the
-    /// overlap of child names.
     fn similarity(&self, na: &Node, nb: &Node, ca: &[&str], cb: &[&str], epsilon: f64) -> f64 {
         let mut keys: Vec<&str> = na.props.iter().map(|p| p.key.as_str()).collect();
         for p in &nb.props {

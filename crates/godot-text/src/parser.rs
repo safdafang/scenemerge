@@ -1,6 +1,3 @@
-//! Recursive-descent parser for Variant literals, mirroring
-//! `VariantParser::parse_value` in Godot.
-
 use crate::error::ParseError;
 use crate::lexer::{Lexer, Punct, TokKind, Token};
 use crate::value::{ContainerType, Number, Value};
@@ -9,7 +6,6 @@ use crate::value::{ContainerType, Number, Value};
 /// few levels; the limit protects against stack overflow on hostile input.
 pub(crate) const MAX_DEPTH: usize = 128;
 
-/// Argument counts of fixed-size math constructors (aliases included).
 fn fixed_arity(name: &str) -> Option<usize> {
     Some(match name {
         "Vector2" | "Vector2i" => 2,
@@ -73,7 +69,6 @@ fn expect_punct(lx: &mut Lexer<'_>, p: Punct, what: &str) -> Result<Token<'stati
     }
 }
 
-/// Parses `( number, number, ... )` (also accepting `inf`/`nan` identifiers).
 fn parse_construct_args(lx: &mut Lexer<'_>, name: &str) -> Result<Vec<Value>, ParseError> {
     expect_punct(lx, Punct::ParenOpen, &format!("after '{name}'"))?;
     let mut args = Vec::new();
@@ -199,7 +194,6 @@ fn is_base64(s: &str) -> bool {
             .all(|b| b.is_ascii_alphanumeric() || b == b'+' || b == b'/')
 }
 
-/// Parses `("id")` or `(123)` after `ExtResource`/`SubResource`.
 fn parse_ref_id(lx: &mut Lexer<'_>, name: &str) -> Result<String, ParseError> {
     expect_punct(lx, Punct::ParenOpen, &format!("after '{name}'"))?;
     let t = lx.next_token()?;
@@ -243,7 +237,6 @@ fn parse_resource_args(lx: &mut Lexer<'_>) -> Result<Vec<String>, ParseError> {
     Ok(parts)
 }
 
-/// Parses a container element type: a name, or a script reference.
 fn parse_container_type<'a>(lx: &mut Lexer<'a>, depth: usize) -> Result<ContainerType, ParseError> {
     let t = lx.next_token()?;
     let TokKind::Ident(id) = t.kind else {

@@ -1,25 +1,8 @@
-//! A normalised, canonical text form of a scene for Git `textconv`.
-//!
-//! Godot's editor renumbers resource ids, reorders `[ext_resource]` sections and
-//! (since 4.6) adds `unique_id`s. The canonical form removes that noise so that
-//! a line-based diff of two canonical files shows only real changes:
-//!
-//! * `ExtResource("1_abcde")` is written as `ExtResource("res://path")`;
-//! * `[ext_resource]` sections are sorted by path and lose their `id`;
-//! * `load_steps`, `unique_id` and `*_id_path` fields are dropped;
-//! * nodes are written with their full `path=` instead of `parent=`;
-//! * connections and editables are sorted;
-//! * values are re-written in Godot's layout with canonical number spelling;
-//! * line endings are LF, there is no BOM and no comments.
-
 use std::fmt::Write as _;
 
 use godot_text::{ContainerType, Number, Value};
 use scene_model::{SceneFile, DEFAULT_CONNECTION_FLAGS};
 
-/// Re-spells numbers canonically: integers as written (without `-0`), floats
-/// as the shortest round-trip decimal; standalone integral floats keep `.0`
-/// so that they stay floats, constructor arguments do not (like Godot's writer).
 fn canon_number(n: &Number, in_construct: bool) -> Number {
     if !n.is_float() {
         return match n.as_i64() {
@@ -50,8 +33,6 @@ fn canon_type(t: &ContainerType, ext: &dyn Fn(&str) -> Option<String>) -> Contai
     }
 }
 
-/// Canonical form of a value: references to external resources become
-/// `ExtResource("res://path")`, numbers are re-spelled, layout is Godot's writer layout.
 fn canon(v: &Value, in_construct: bool, ext: &dyn Fn(&str) -> Option<String>) -> Value {
     match v {
         Value::Number(n) => Value::Number(canon_number(n, in_construct)),
@@ -108,7 +89,6 @@ pub fn canonical_text(file: &SceneFile) -> String {
     let value = |v: &Value| -> String { canon(v, false, &ext_path).to_string() };
     let mut out = String::new();
 
-    // Descriptor.
     if let Some(first) = file.doc.sections.first() {
         let _ = write!(out, "[{}", first.header.name);
         for f in &first.header.fields {
@@ -119,7 +99,6 @@ pub fn canonical_text(file: &SceneFile) -> String {
         out.push_str("]\n");
     }
 
-    // External resources, sorted by path (then uid) without ids.
     let mut exts: Vec<_> = file.ext_resources.iter().collect();
     exts.sort_by(|a, b| a.path.cmp(&b.path).then(a.uid.cmp(&b.uid)));
     if !exts.is_empty() {

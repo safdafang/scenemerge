@@ -1,10 +1,5 @@
-//! `write(parse(x)) == x`, byte for byte, for every fixture.
-//!
-//! Set `SCENEMERGE_CORPUS=/path/to/dir` to additionally check every
-//! `.tscn`/`.tres` file under an external directory (e.g. a full checkout of
-//! godot-demo-projects or your own game).
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -56,7 +51,6 @@ fn check_round_trip(files: &[PathBuf]) -> Vec<String> {
                         .unwrap_or(out.len().min(bytes.len()));
                     failures.push(format!("{}: output differs at byte {at}", path.display()));
                 }
-                // Every property must have been recognised (no stray text).
                 for s in &doc.sections {
                     for item in &s.body {
                         if let BodyItem::Trivia(t) = item {

@@ -1,5 +1,3 @@
-//! `diff`, `textconv` and `git-diff` commands.
-
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -67,14 +65,12 @@ fn set_color(when: ColorWhen) {
     choice.write_global();
 }
 
-/// Loads both sides; a missing side becomes an empty file of the same kind.
 fn load_pair(
     old: &Path,
     new: &Path,
     old_name: &Path,
     new_name: &Path,
 ) -> Result<(SceneFile, SceneFile, &'static str)> {
-    // Both files are parsed in parallel: parsing dominates the run time.
     let (a, b) = std::thread::scope(|scope| {
         let ha = scope.spawn(|| load_optional(old, old_name));
         let b = load_optional(new, new_name);
@@ -138,7 +134,6 @@ pub fn run(args: &DiffArgs) -> Result<u8> {
     }
     out.flush()?;
     let code = u8::from(args.exit_code && !d.is_empty());
-    // About to exit: skip freeing the models (see DECISIONS.md, D12).
     std::mem::forget((a, b, d));
     Ok(code)
 }
@@ -156,14 +151,12 @@ pub fn textconv(file: &Path) -> Result<u8> {
 pub fn git_diff(args: &GitDiffArgs) -> Result<u8> {
     let a = &args.args;
     let (Some(path), Some(old), Some(new)) = (a.first(), a.get(1), a.get(4)) else {
-        // Unmerged path: Git passes only the path. Nothing sensible to show.
         if let Some(p) = a.first() {
             println!("* Unmerged path {p}");
         }
         return Ok(0);
     };
     let new_path = a.get(7).unwrap_or(path);
-    // Git pipes our output into its pager; colour like Git does then.
     let colour = if std::env::var_os("GIT_PAGER_IN_USE").is_some() {
         ColorWhen::Always
     } else {

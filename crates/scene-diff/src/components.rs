@@ -1,6 +1,3 @@
-//! Component-wise comparison of compound values (vectors, transforms,
-//! colours, arrays, dictionaries) for readable diffs.
-
 use godot_text::{canonical_construct_name, Value};
 
 use crate::change::ComponentChange;
@@ -26,10 +23,7 @@ pub(crate) fn component_names(constructor: &str) -> Option<Vec<String>> {
             "size.z",
         ]),
         "Plane" => s(&["normal.x", "normal.y", "normal.z", "d"]),
-        // columns[i][j] written column by column.
         "Transform2D" => s(&["x.x", "x.y", "y.x", "y.y", "origin.x", "origin.y"]),
-        // Basis is written row by row: argument i*3+j is rows[i][j], i.e.
-        // component i of column (axis) j.
         "Basis" => basis_names(""),
         "Transform3D" => {
             let mut v = basis_names("basis.");
@@ -59,8 +53,6 @@ fn basis_names(prefix: &str) -> Vec<String> {
     v
 }
 
-/// Maximum number of element-level changes listed for arrays/dictionaries
-/// before falling back to a summary.
 const MAX_ELEMENT_CHANGES: usize = 8;
 
 /// Computes component changes between `old` and `new` (both already
@@ -92,7 +84,6 @@ pub(crate) fn components(
                 }
                 return Vec::new();
             }
-            // Packed arrays: element-wise when the length is unchanged.
             sequence(a1, a2, show_old, show_new, eq)
         }
         (Value::Array(a1), Value::Array(a2))

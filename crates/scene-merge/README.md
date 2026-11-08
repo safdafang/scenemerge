@@ -1,7 +1,7 @@
 # scene-merge
 
 Three-way semantic merge of Godot 4 scenes and resources, part of
-[scenemerge](https://github.com/OWNER/scenemerge).
+[scenemerge](https://github.com/safdafang/scenemerge).
 
 ```rust
 let out = scene_merge::merge(&base, &ours, &theirs, &scene_merge::MergeOptions::default())?;

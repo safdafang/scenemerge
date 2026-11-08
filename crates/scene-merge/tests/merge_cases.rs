@@ -1,14 +1,5 @@
-//! Merge scenarios from `tests/merge-cases/<name>/`:
-//!
-//! * `base.*`, `ours.*`, `theirs.*` — the inputs (`.tscn` or `.tres`);
-//! * `expected.*` — the exact merged output;
-//! * `expected-report.json` — the conflict report;
-//! * `options.txt` (optional) — `conflict=ours|theirs|markers`.
-//!
-//! Set `SCENEMERGE_BLESS=1` to (re)write the expected files from the actual
-//! output — then review the diff before committing.
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -36,7 +27,6 @@ fn load(p: &Path) -> SceneFile {
     SceneFile::parse_bytes(&fs::read(p).unwrap()).unwrap_or_else(|e| panic!("{}", e.with_path(p)))
 }
 
-/// Runs one case; returns a description of the mismatch, if any.
 fn run_case(dir: &Path) -> Option<String> {
     let name = dir.file_name().unwrap().to_string_lossy().to_string();
     let base = find(dir, "base").unwrap_or_else(|| panic!("{name}: no base"));
@@ -87,7 +77,6 @@ fn run_case(dir: &Path) -> Option<String> {
             "report differs:\n--- expected\n{expected_report}\n--- actual\n{report}"
         ));
     }
-    // A clean merge must be a valid file that Godot can load.
     if out.is_clean() {
         let f = SceneFile::parse(&out.text)
             .unwrap_or_else(|e| panic!("{name}: clean output does not parse: {e}"));

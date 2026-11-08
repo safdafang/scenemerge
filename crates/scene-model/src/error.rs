@@ -1,5 +1,3 @@
-//! Errors produced while building the semantic model.
-
 use std::path::{Path, PathBuf};
 
 use godot_text::ParseError;

@@ -1,7 +1,3 @@
-//! Lossless document model: every byte of the input belongs to exactly one
-//! piece (leading trivia, a section header, a property or trivia), so writing
-//! the pieces back in order reproduces the input byte for byte.
-
 use std::fmt;
 
 use crate::error::ParseError;
@@ -40,8 +36,6 @@ pub struct Field {
     pub raw_value: String,
 }
 
-/// Godot's saver writes `binds= [...]` (with a space) in connections and
-/// `key=value` everywhere else.
 fn field_separator(header: &str, key: &str) -> &'static str {
     if header == "connection" && key == "binds" {
         "= "
@@ -367,7 +361,6 @@ impl fmt::Display for Document {
     }
 }
 
-/// Maps byte offsets to 1-based line numbers.
 struct LineIndex {
     starts: Vec<usize>,
 }
@@ -401,7 +394,6 @@ impl<'a> DocParser<'a> {
     }
 
     fn parse(mut self) -> Result<Document, ParseError> {
-        // Leading trivia: whitespace and comments before the first '['.
         self.lx.skip_trivia();
         let leading = self.lx.slice(0, self.lx.pos).to_string();
         let mut sections = Vec::new();
@@ -429,7 +421,6 @@ impl<'a> DocParser<'a> {
         })
     }
 
-    /// Parses `[tag key=value ...]` starting at the `[`.
     fn parse_header(&mut self) -> Result<Header, ParseError> {
         let start = self.lx.pos;
         let open = self.lx.next_token()?;
@@ -501,8 +492,6 @@ impl<'a> DocParser<'a> {
         })
     }
 
-    /// Parses properties and trivia after a header. Returns the body and
-    /// whether another section follows.
     fn parse_body(&mut self) -> Result<(Vec<BodyItem>, bool), ParseError> {
         let mut body = Vec::new();
         loop {
@@ -530,8 +519,6 @@ impl<'a> DocParser<'a> {
         }
     }
 
-    /// Parses `key = value`, following Godot's `parse_tag_assign_eof`: the key
-    /// is every non-whitespace character before `=` (or a quoted string).
     fn parse_property(&mut self) -> Result<Property, ParseError> {
         let start = self.lx.pos;
         let mut key = String::new();

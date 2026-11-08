@@ -1,5 +1,3 @@
-//! Typed view of a parsed document: descriptor, resources, nodes, connections.
-
 use std::collections::HashMap;
 
 use godot_text::{Document, Header, ParseError, Value};
@@ -85,7 +83,7 @@ pub enum ParentRef {
     None,
     /// A node defined in this file (index into [`SceneFile::nodes`]).
     Node(usize),
-    /// A node that is not defined in this file — it comes from an instanced or
+    /// A node that is not defined in this file; it comes from an instanced or
     /// inherited scene. Holds the `parent=` path text.
     External(String),
 }
@@ -214,15 +212,12 @@ fn str_field(h: &Header, key: &str) -> Option<String> {
 fn int_field(h: &Header, key: &str) -> Option<i64> {
     match h.get(key)? {
         Value::Number(n) => n.as_i64().or_else(|| Some(n.as_f64() as i64)),
-        // `index="3"` is written as a string by the saver.
         Value::String(s) => s.trim().parse().ok(),
         _ => None,
     }
 }
 
 fn props_of(section: &godot_text::Section) -> Vec<Prop> {
-    // Duplicate keys are rare (the last one wins, as in Godot): find them
-    // first so that the common case does no hashing at all.
     let all: Vec<&godot_text::Property> = section.properties().collect();
     let has_duplicates = if all.len() <= 32 {
         all.iter()
@@ -235,7 +230,7 @@ fn props_of(section: &godot_text::Section) -> Vec<Prop> {
     let mut out: Vec<Prop> = Vec::with_capacity(all.len());
     for (i, p) in all.iter().enumerate() {
         if has_duplicates && all.iter().skip(i + 1).any(|q| q.key == p.key) {
-            continue; // a later assignment overrides this one
+            continue;
         }
         out.push(Prop {
             key: p.key.clone(),
@@ -596,7 +591,6 @@ impl SceneFile {
     pub fn validate(&self) -> Vec<Issue> {
         let mut issues = Vec::new();
         let line = |s: usize| self.line_of(s);
-        // Section order: descriptor, ext, sub, then nodes/resource/connections/editables.
         let mut phase = 0;
         for (si, s) in self.doc.sections.iter().enumerate().skip(1) {
             let p = match s.header.name.as_str() {
@@ -615,7 +609,6 @@ impl SceneFile {
             }
             phase = phase.max(p);
         }
-        // Duplicate ids.
         let mut seen = HashMap::new();
         for e in &self.ext_resources {
             if seen.insert(e.id.as_str(), ()).is_some() {
@@ -634,7 +627,6 @@ impl SceneFile {
                 });
             }
         }
-        // References.
         let sub_pos: HashMap<&str, usize> = self
             .sub_resources
             .iter()
@@ -681,8 +673,6 @@ impl SceneFile {
                 check_value(&p.value, rs, &mut issues);
             }
         }
-        // A scene needs a root; a parent outside this file must live inside an
-        // instanced scene (inherited scene, or a child of an instance).
         if self.kind == FileKind::Scene && self.nodes.is_empty() {
             issues.push(Issue {
                 line: line(0),
@@ -716,8 +706,6 @@ impl SceneFile {
     }
 }
 
-/// Normalises a `parent=` value: Godot's saver writes `simplified()` paths;
-/// strip a leading `./` that hand-written files sometimes contain.
 fn normalize_parent(p: &str) -> String {
     let mut s = p;
     while let Some(rest) = s.strip_prefix("./") {

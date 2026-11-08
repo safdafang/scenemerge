@@ -2,8 +2,8 @@
 
 `scenemerge` produces two JSON documents:
 
-* the **diff report** — `scenemerge diff --format json OLD NEW`;
-* the **conflict report** — `scenemerge merge … --report FILE`.
+* the **diff report**: `scenemerge diff --format json OLD NEW`;
+* the **conflict report**: `scenemerge merge … --report FILE`.
 
 Both carry a top-level `schema_version` (currently **1**). Within a schema
 version, fields are only ever *added*; consumers must ignore unknown fields
@@ -50,13 +50,13 @@ Property changes carry a `target`:
 |---|---|---|
 | `node` | `path` | a node (path in the new version) |
 | `sub_resource` | `id`, `type` | a `[sub_resource]` (id in the new version) |
-| `resource` | — | the `[resource]` section of a `.tres` file |
+| `resource` | (none) | the `[resource]` section of a `.tres` file |
 
 ### Change kinds
 
 | `kind` | fields |
 |---|---|
-| `HeaderChanged` | `field`, `old`?, `new`? — a descriptor field such as `uid`, `format`, `type`, `script_class` (`load_steps` is ignored) |
+| `HeaderChanged` | `field`, `old`?, `new`?: a descriptor field such as `uid`, `format`, `type`, `script_class` (`load_steps` is ignored) |
 | `ExtResourceAdded` | `path`, `type`, `uid`? |
 | `ExtResourceRemoved` | `path`, `type`, `uid`? |
 | `ExtResourceChanged` | `path` (new), `changes`: [`FieldChange`] for `path` / `type` / `uid` |
@@ -66,12 +66,12 @@ Property changes carry a `target`:
 | `NodeAdded` | `path`, `type`?, `instance`? (path of the instanced scene) |
 | `NodeRemoved` | `path` (old), `type`? |
 | `NodeRenamed` | `path` (old), `new_name`, `new_path` |
-| `NodeMoved` | `path` (old), `new_path` — the parent changed (the name may have changed too) |
-| `NodeReordered` | `path`, `old_position`, `new_position` — 0-based position among siblings |
+| `NodeMoved` | `path` (old), `new_path`: the parent changed (the name may have changed too) |
+| `NodeReordered` | `path`, `old_position`, `new_position`: 0-based position among siblings |
 | `NodeTypeChanged` | `path`, `old`?, `new`? |
 | `InstanceChanged` | `path`, `old`?, `new`? (paths of the instanced scenes) |
 | `GroupsChanged` | `path`, `added`: [string], `removed`: [string] |
-| `NodeAttributeChanged` | `path`, `field`, `old`?, `new`? — `owner`, `index`, `instance_placeholder`, `node_paths`, … |
+| `NodeAttributeChanged` | `path`, `field`, `old`?, `new`? (`owner`, `index`, `instance_placeholder`, `node_paths`, …) |
 | `PropertyAdded` | `target`, `property`, `new` |
 | `PropertyRemoved` | `target`, `property`, `old` (the property is back to its default) |
 | `PropertyChanged` | `target`, `property`, `old`, `new`, `components`? |

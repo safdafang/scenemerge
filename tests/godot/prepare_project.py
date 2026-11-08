@@ -1,17 +1,5 @@
 #!/usr/bin/env python3
-"""Builds a throw-away Godot project that contains merged scenes and stubs for
-every resource they reference, so that Godot can load them.
-
-Usage:
-    prepare_project.py OUT_DIR [--cases tests/merge-cases] [--scenes DIR ...]
-
-* Every clean merge case (`expected-report.json` with "clean": true) contributes
-  its `expected.*` file as `res://merged/<case>.<ext>`.
-* `--scenes DIR` adds the .tscn/.tres files of DIR (e.g. results of merging a
-  real demo project) under `res://merged/<name>/`, keeping relative paths.
-* Missing `ext_resource` targets get minimal stubs: scripts, scenes, shaders,
-  resources, PNG and SVG images (images need `godot --import`).
-"""
+"""Usage: prepare_project.py OUT_DIR [--cases DIR] [--scenes DIR ...]"""
 
 import argparse
 import base64
@@ -26,7 +14,6 @@ PNG_1x1 = base64.b64decode(
 )
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8"/></svg>\n'
 
-# Abstract resource types cannot be instantiated from a stub .tres.
 CONCRETE = {
     "Texture2D": "ImageTexture",
     "Texture": "ImageTexture",
@@ -40,11 +27,9 @@ CONCRETE = {
 
 EXT_RE = re.compile(r'^\[ext_resource\b[^\]]*\]', re.M)
 
-
 def field(header: str, key: str):
     m = re.search(r'\b' + key + r'="((?:[^"\\]|\\.)*)"', header)
     return m.group(1) if m else None
-
 
 def stub(project: str, res_path: str, type_name: str) -> None:
     if not res_path.startswith("res://"):
@@ -56,7 +41,6 @@ def stub(project: str, res_path: str, type_name: str) -> None:
     os.makedirs(os.path.dirname(target) or project, exist_ok=True)
     ext = os.path.splitext(rel)[1].lower()
     if ext == ".gd":
-        # Object is a parent of every class, so the stub fits any node/resource.
         text = "extends Object\n"
     elif ext in (".tscn", ".scn"):
         text = '[gd_scene format=3]\n\n[node name="Stub" type="Node"]\n'
@@ -77,7 +61,6 @@ def stub(project: str, res_path: str, type_name: str) -> None:
     with open(target, "w", encoding="utf-8", newline="\n") as f:
         f.write(text)
 
-
 def add_file(project: str, src: str, dest_rel: str) -> None:
     dest = os.path.join(project, "merged", *dest_rel.split("/"))
     os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -86,7 +69,6 @@ def add_file(project: str, src: str, dest_rel: str) -> None:
     for m in EXT_RE.finditer(text):
         h = m.group(0)
         stub(project, field(h, "path") or "", field(h, "type") or "")
-
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -130,7 +112,6 @@ def main() -> int:
                     count += 1
     print(f"prepared {count} merged file(s) in {a.out}")
     return 0 if count else 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

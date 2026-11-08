@@ -1,21 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-end merge of a real Godot project through `git merge`.
-
-Usage:
-    merge_demo_project.py SCENEMERGE DEMO_PROJECT_DIR WORK_DIR
-
-Creates WORK_DIR as a Git repository with a copy of the project, installs
-scenemerge as merge driver, and creates two branches that touch every scene:
-
-* feature: renumbers every ext_resource id (as the Godot editor does) and adds
-  a node "ScenemergeTheirs" under the root;
-* main:    adds a node "ScenemergeOurs" under the root.
-
-With a line-based merge the two branches conflict in practically every
-scene. With scenemerge `git merge` must succeed and every merged scene must
-contain both nodes and no conflict markers. The merged project is then ready
-for `godot --import` + `check_load.gd`.
-"""
+"""Usage: merge_demo_project.py SCENEMERGE DEMO_PROJECT_DIR WORK_DIR"""
 
 import os
 import re
@@ -23,13 +7,11 @@ import shutil
 import subprocess
 import sys
 
-
 def git(cwd, *args, check=True):
     r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
     if check and r.returncode != 0:
         sys.exit(f"git {' '.join(args)} failed:\n{r.stdout}\n{r.stderr}")
     return r
-
 
 def scenes(root):
     for d, dirs, files in os.walk(root):
@@ -38,16 +20,13 @@ def scenes(root):
             if f.endswith(".tscn"):
                 yield os.path.join(d, f)
 
-
 def read(p):
     with open(p, encoding="utf-8", newline="") as f:
         return f.read()
 
-
 def write(p, s):
     with open(p, "w", encoding="utf-8", newline="") as f:
         f.write(s)
-
 
 def add_root_child(text, name):
     """Adds `[node name=NAME type="Node" parent="."]` after the last node."""
@@ -55,7 +34,6 @@ def add_root_child(text, name):
     last_node = max((i for i, l in enumerate(lines) if l.startswith("[node ")), default=None)
     if last_node is None:
         return text
-    # End of that node's body: the next section header or EOF.
     end = len(lines)
     for i in range(last_node + 1, len(lines)):
         if lines[i].startswith("[") and (lines[i].startswith("[connection") or lines[i].startswith("[editable")):
@@ -66,17 +44,14 @@ def add_root_child(text, name):
     block = ["", f'[node name="{name}" type="Node" parent="."]']
     return "\n".join(lines[:end] + block + lines[end:])
 
-
 EXT_HEADER = re.compile(r'^(\[ext_resource\b[^\n]*?\bid=")([^"]+)(")', re.M)
 EXT_REF = re.compile(r'ExtResource\(\s*"?([A-Za-z0-9_]+)"?\s*\)')
-
 
 def renumber_ext_ids(text):
     ids = [m.group(2) for m in EXT_HEADER.finditer(text)]
     mapping = {old: f"{i + 1}_r{abs(hash(old)) % 99999:05d}" for i, old in enumerate(reversed(ids))}
     text = EXT_HEADER.sub(lambda m: m.group(1) + mapping.get(m.group(2), m.group(2)) + m.group(3), text)
     return EXT_REF.sub(lambda m: f'ExtResource("{mapping.get(m.group(1), m.group(1))}")', text)
-
 
 def main():
     if len(sys.argv) != 4:
@@ -117,7 +92,6 @@ def main():
     if bad:
         sys.exit("bad merge results:\n" + "\n".join(bad))
     print(f"merged {len(files)} scene(s) cleanly in {work}")
-
 
 if __name__ == "__main__":
     main()

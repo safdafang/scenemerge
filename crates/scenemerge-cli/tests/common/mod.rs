@@ -1,5 +1,3 @@
-//! Helpers for end-to-end tests that drive real `git` repositories.
-
 #![allow(dead_code)]
 
 use std::path::{Path, PathBuf};
@@ -40,7 +38,6 @@ impl Repo {
     fn command(&self, program: &str) -> Command {
         let mut c = Command::new(program);
         c.current_dir(self.dir.path())
-            // Isolate from the developer's/CI's global and system config.
             .env("HOME", self.home.path())
             .env("USERPROFILE", self.home.path())
             .env("XDG_CONFIG_HOME", self.home.path().join(".config"))

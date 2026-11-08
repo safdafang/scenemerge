@@ -14,7 +14,6 @@ scene-model = { path = "../crates/scene-model" }
 scene-diff = { path = "../crates/scene-diff" }
 scene-merge = { path = "../crates/scene-merge" }
 
-# Keep the fuzz crate out of the main workspace (it needs nightly).
 [workspace]
 members = ["."]
 

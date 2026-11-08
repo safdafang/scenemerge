@@ -32,5 +32,5 @@ First release.
   insta snapshots, 46 merge scenarios, property tests, fuzzing (stable and
   cargo-fuzz), end-to-end Git tests, headless Godot integration (4.6 and 4.7).
 
-[Unreleased]: https://github.com/OWNER/scenemerge/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/OWNER/scenemerge/releases/tag/v0.1.0
+[Unreleased]: https://github.com/safdafang/scenemerge/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/safdafang/scenemerge/releases/tag/v0.1.0

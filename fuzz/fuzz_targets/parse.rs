@@ -1,4 +1,3 @@
-//! The parser must never panic, and anything it accepts must round-trip.
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;

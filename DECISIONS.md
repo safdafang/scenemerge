@@ -4,10 +4,10 @@ A log of architectural decisions and of facts about the Godot text formats that
 were verified against the engine source. Engine references are to the `master`
 branch of `godotengine/godot` as of 2026-11 (Godot 4.6+):
 
-* `core/variant/variant_parser.cpp` — tokenizer (`get_token`), value parser
+* `core/variant/variant_parser.cpp`: tokenizer (`get_token`), value parser
   (`parse_value`), tag parser (`_parse_tag`), property reader
   (`parse_tag_assign_eof`) and writer (`VariantWriter::write`);
-* `scene/resources/resource_format_text.cpp` — `ResourceLoaderText` /
+* `scene/resources/resource_format_text.cpp`: `ResourceLoaderText` /
   `ResourceFormatSaverTextInstance`;
 * `core/string/ustring.cpp` (`property_name_encode`, `c_escape`,
   `c_escape_multiline`), `core/io/resource.cpp` (`generate_scene_unique_id`),
@@ -19,7 +19,7 @@ Each entry: **Context → Decision → Consequences**.
 
 ## D1. Hand-written lexer and parser instead of `winnow`/`nom`
 
-* **Context.** The brief suggests `winnow` or `nom`. The grammar is token-based,
+* **Context.** Parser combinators (`winnow`, `nom`) were considered. The grammar is token-based,
   and Godot's own reader is a hand-written tokenizer plus a recursive-descent
   parser with several quirks (see the format notes below).
 * **Decision.** Port `VariantParser::get_token`/`parse_value` structurally to a
@@ -74,7 +74,7 @@ all platforms (3 s in normal test runs, `FUZZ_SECONDS=600` for long runs).
 
 ## D6. Accept `format=3` and `format=4`; reject `format<=2` with a clear message
 
-* **Context.** The brief targets `format=3`. The engine source says otherwise:
+* **Context.** Godot 4 is usually described as `format=3`, but the engine source says:
   `ResourceLoaderText::FORMAT_VERSION = 4`, `FORMAT_VERSION_COMPAT = 3`. Since
   Godot 4.3 the saver writes `format=3` *unless* the file contains a
   `PackedVector4Array` or a `PackedByteArray` longer than 64 bytes (written as
@@ -87,24 +87,24 @@ all platforms (3 s in normal test runs, `FUZZ_SECONDS=600` for long runs).
   content needs format 4 (it contains a base64 byte array or `PackedVector4Array`)
   the writer bumps it to 4.
 
-## D7. Identity matching (spec §4)
+## D7. Identity matching
 
 Implemented in `scene_model::Matching`:
 
-1. **ext_resource** — same `uid`; then same `path`. Ids are never compared.
-2. **sub_resource** — same `id`; then same `type` + equal *normalised*
+1. **ext_resource**: same `uid`; then same `path`. Ids are never compared.
+2. **sub_resource**: same `id`; then same `type` + equal *normalised*
    content, processed in file order so that nested references
    (`GradientTexture1D` → `Gradient`) resolve first. Instead of a content hash
    the candidates are compared directly with `semantic_eq` (only unmatched
    entries are compared, so the cost is negligible and there are no hash collisions).
-3. **node** — `unique_id` when present on both sides and unique in each file
+3. **node**: `unique_id` when present on both sides and unique in each file
    (duplicates disable the rule for that id); the roots always correspond; then
    *same name under the matched parent* (a path match that also works under a
    renamed ancestor); then the rename/move heuristic, alternating with the path
    pass until nothing changes, so that children of a renamed node match by path.
    Nodes whose parent is not in the file (overrides in inherited scenes) are
    matched by their `parent=` text.
-4. **Heuristic** — only pairs with the same `type` and the same normalised
+4. **Heuristic**: only pairs with the same `type` and the same normalised
    `instance`. Score = `0.6·content + 0.25·[same parent] + 0.15·[same name]`;
    content = (Σ per property: 1 if equal, 0.5 if only the key matches, + number of
    common child names) / (union of property keys + union of child names), or 1
@@ -115,7 +115,7 @@ Implemented in `scene_model::Matching`:
    Consequence: an *empty* node deleted and another empty node of the same type
    added under the same parent is reported as a rename; for scenes saved by
    Godot 4.6+ `unique_id` makes this exact anyway.
-5. **Normalisation** — `ExtResource("id")`/`SubResource("id")` are replaced by
+5. **Normalisation**: `ExtResource("id")`/`SubResource("id")` are replaced by
    tokens naming the matched entity before values are compared, so id
    renumbering never shows up as a property change.
 
@@ -129,7 +129,7 @@ Implemented in `scene_model::Matching`:
 * Connection endpoints and `[editable]` paths of the old version are translated
   through the node matching before comparison, so renaming a node does not
   turn its connections into "removed + added".
-* `NodeAttributeChanged` (not in the brief's list) covers the remaining header
+* `NodeAttributeChanged` (beyond the basic change kinds) covers the remaining header
   attributes (`owner`, `index`, `instance_placeholder`, `node_paths`, …) so that
   nothing is silently dropped.
 * `SubResourceChanged` is emitted only for a type change; property changes of a
@@ -137,7 +137,7 @@ Implemented in `scene_model::Matching`:
   This keeps one uniform shape for every property change in JSON.
 * Compound values are broken down into components (see `docs/json-schema.md`);
   `Transform3D`'s translation is called `origin.*` (the engine's field name)
-  rather than `position.*` used in the brief's example, because `position` is a
+  rather than `position.*`, because `position` is a
   property of `Node3D`, not a component of `Transform3D`.
 * `scenemerge diff` exits 0 even when there are differences (opt in with
   `--exit-code`), because `GIT_EXTERNAL_DIFF`/`diff.<driver>.command`
@@ -162,7 +162,7 @@ sub-resources canonically would turn one insertion into a cascade of changes.
   (those placeholders do not exist in older versions). The result must be left
   in `%A`.
 * Git treats a driver exit status of 1..=128 as "conflicts" and > 128 as a
-  crash. The brief's "2 and above = error" therefore still marks the path as
+  crash. Exit code 2 (error) therefore still marks the path as
   conflicted in Git (it does not abort the merge); see the merge section for how
   errors keep the user's data safe.
 * External diff: 7 arguments `path old-file old-hex old-mode new-file new-hex new-mode`,
@@ -177,7 +177,7 @@ sub-resources canonically would turn one insertion into a cascade of changes.
 * `--global` uses `core.attributesFile`, falling back to
   `$XDG_CONFIG_HOME/git/attributes` or `~/.config/git/attributes` (Git's defaults).
 
-## D11. Three-way merge (spec §6)
+## D11. Three-way merge
 
 `scene_merge::merge` works on the model and writes the result starting from
 OURS, so that every untouched section is copied byte for byte (the diff of
@@ -202,12 +202,12 @@ the result against OURS is minimal, and `merge(base, x, base) == x` exactly).
   OURS kept the base order) move the node with its whole subtree.
 * **Renames/moves** update `parent=` of descendants and connection `from`/`to`
   automatically: those are recomputed from the final tree. NodePath property
-  values (`NodePath("../Player")`) are *not* rewritten — the editor already
+  values (`NodePath("../Player")`) are *not* rewritten: the editor already
   rewrote them on the side that renamed (a limitation, see README).
 * **Resources** are imported from THEIRS on demand, when merged content
   references them. An ext_resource is the same file if uid/path match; a new
   one keeps the id from THEIRS unless that id is taken, then gets a fresh
-  Godot-style id `"<n>_<5 chars>"` (alphabet `a`–`y`, `0`–`8`, see the format
+  Godot-style id `"<n>_<5 chars>"` (alphabet `a` to `y`, `0` to `8`, see the format
   notes) and every reference is rewritten at token level, so formatting is kept.
   Sub-resources likewise (`"<Type>_<5 chars>"`); nested sub-resources are
   imported dependencies first. Ext/sub resources that THEIRS deleted are removed
@@ -216,14 +216,13 @@ the result against OURS is minimal, and `merge(base, x, base) == x` exactly).
   the inputs): the same merge always produces the same file.
 * **unique_id collisions** (two *different* new nodes with the same id) are
   resolved like local id collisions: the node from THEIRS gets a fresh id,
-  reported in `resolutions`. The brief lists this under conflicts; it is
-  resolved automatically because Godot itself reassigns duplicate unique ids on
+  reported in `resolutions`. This is resolved automatically because Godot itself reassigns duplicate unique ids on
   save (`packed_scene.cpp`), so there is nothing for a human to decide. Two new
   nodes with the same unique_id *and* the same place are the same node.
 * **Conflict markers** (`--conflict markers`) surround the smallest unit: one
   property line, one header line (rename/move/type/instance…), one connection
   line, or one node block for delete/modify. The file then does not open in
-  Godot until fixed — by design, as with any Git conflict.
+  Godot until fixed. This is by design, as with any Git conflict.
   `--conflict ours|theirs` produce a valid file and still report conflicts.
 * **Line endings** follow OURS; imported text (including line breaks inside
   multi-line strings) is converted, which matches what `core.autocrlf` does to
@@ -261,13 +260,13 @@ End to end, `scenemerge diff` on 10k-node files takes ≈160 ms wall-clock and
 `scenemerge merge` ≈275 ms (including ≈75 ms process start-up under Git Bash and
 the re-validation of the merged file).
 
-## D13. Godot integration test (spec §8.6)
+## D13. Godot integration test
 
 * `tests/godot/check_load.gd` (a `SceneTree` script run with
   `godot --headless --path P -s res://check_load.gd -- res://dir`; flags
   verified in the 4.7 command-line docs) loads every file with
   `ResourceLoader.load`, instantiates plain scenes and compares the number of
-  nodes owned by the scene root with the number of `[node]` sections — Godot
+  nodes owned by the scene root with the number of `[node]` sections: Godot
   silently drops a node whose `parent=` does not exist, which a plain load would
   not reveal.
 * Godot refuses to load a scene whose dependencies are missing, so
@@ -285,9 +284,8 @@ the re-validation of the merged file).
 
 ## D14. Release workflow without cargo-dist
 
-The brief suggests `cargo-dist`. Its workflow is generated by `dist init` and
-tied to the dist version; it could not be run and verified in the development
-environment. `.github/workflows/release.yml` is a short hand-written
+`cargo-dist` was considered. Its workflow is generated by `dist init` and
+tied to the dist version; a hand-written workflow is easier to audit. `.github/workflows/release.yml` is a short hand-written
 equivalent: on a `v*` tag it builds `x86_64-unknown-linux-musl` (fully static),
 `x86_64-apple-darwin`, `aarch64-apple-darwin` and `x86_64-pc-windows-msvc`
 (static CRT), smoke-tests each binary on the fixtures, packages archives with
@@ -302,8 +300,8 @@ SHA-256 sums and publishes a GitHub release whose notes are the matching
 
 * Whitespace is **any** character with code `<= 32`, so `\r` is just whitespace;
   CRLF needs no special handling in the grammar.
-* `;` starts a comment **anywhere outside a string** — in headers, between
-  values, after a property — not only at the start of a line. Godot drops
+* `;` starts a comment **anywhere outside a string** (in headers, between
+  values, after a property), not only at the start of a line. Godot drops
   comments when it re-saves a file.
 * Strings are raw and may contain literal newlines. Escapes: `\b \t \n \f \r`,
   `\uXXXX` (4 hex digits), `\UXXXXXX` (6), UTF-16 surrogate pairs are combined,
@@ -335,7 +333,7 @@ SHA-256 sums and publishes a GitHub release whose notes are the matching
   type is an identifier or a script reference (`ExtResource("..")`, …); the bare
   identifier `Resource` followed by `]`/`,` is the class name `Resource`.
 
-### Writer (`VariantWriter::write`) — used when we have to produce new text
+### Writer (`VariantWriter::write`): used when we have to produce new text
 
 * `String` → `"` + escape only `\` and `"` (`c_escape_multiline`) + `"`.
 * `StringName`, `NodePath` and string header fields use full `c_escape`.
@@ -381,10 +379,10 @@ SHA-256 sums and publishes a GitHub release whose notes are the matching
   saved; sub-resource ids: `"<Type>_<5 chars>"`.
 * The 5 characters come from `Resource::generate_scene_unique_id`, which uses
   `char_count = 'z' - 'a'` = 25 and `base = 25 + ('9' - '0')` = 34, so the
-  alphabet is actually **`a`–`y` and `0`–`8`** (an off-by-one in the engine).
+  alphabet is actually **`a` to `y` and `0` to `8`** (an off-by-one in the engine).
   Generated ids reproduce this alphabet.
 * UIDs (`ResourceUID::id_to_text`) use the **same 34-character alphabet**
-  (`uuid_characters` = `a`–`y`, `0`–`8`, base 34), most significant digit first,
+  (`uuid_characters` = `a` to `y`, `0` to `8`, base 34), most significant digit first,
   for a 63-bit value (at most 13 characters, e.g. `uid://d4n4ub6itg400`).
   `text_to_id` rejects any other character, so a UID containing `z` or `9` is invalid.
 
@@ -395,5 +393,5 @@ SHA-256 sums and publishes a GitHub release whose notes are the matching
   `owner_uid_path`, `from_uid_path`, `to_uid_path`, `instance_placeholder`, `flags`
   or `unbinds` (covered by synthetic fixtures instead).
 * Several files contain lines starting with `[` (`[cell]`, `[ul]`, `[font_size=…]`)
-  inside multi-line BBCode strings — a line-based "section starts with `[`"
+  inside multi-line BBCode strings; a line-based "section starts with `[`"
   heuristic would corrupt them.

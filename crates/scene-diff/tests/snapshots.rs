@@ -1,9 +1,5 @@
-//! Snapshot tests of the human and JSON diff output.
-//!
-//! Each directory in `tests/data/` holds `old.*` and `new.*`. Review changed
-//! snapshots with `cargo insta review` (or `INSTA_UPDATE=always cargo test`).
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -81,8 +77,6 @@ fn editor_noise_produces_no_changes() {
 
 #[test]
 fn canonical_text_hides_editor_noise() {
-    // Same scene: ext ids renumbered and reordered, load_steps dropped,
-    // unique ids added, CRLF, odd spacing, `0` spelled `0.0`.
     let a = concat!(
         "[gd_scene load_steps=3 format=3 uid=\"uid://x\"]\n\n",
         "[ext_resource type=\"Script\" path=\"res://a.gd\" id=\"1_aaaaa\"]\n",

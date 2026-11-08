@@ -1,8 +1,5 @@
-//! Editing helpers for lossless sections.
-
 use godot_text::{BodyItem, Header, ParseError, Property, Section};
 
-/// The order in which Godot's saver writes node header fields.
 const NODE_FIELD_ORDER: &[&str] = &[
     "name",
     "type",
@@ -58,7 +55,7 @@ pub(crate) fn set_header_field(h: &mut Header, key: &str, raw: String) -> Result
             .iter()
             .position(|f| rank(&f.key).is_some_and(|fr| fr > r))
     });
-    h.set_field(key, raw)?; // appended at the end and parsed/validated
+    h.set_field(key, raw)?;
     if let Some(pos) = insert_at {
         if let Some(f) = h.fields.pop() {
             h.fields.insert(pos, f);
@@ -68,7 +65,6 @@ pub(crate) fn set_header_field(h: &mut Header, key: &str, raw: String) -> Result
     Ok(())
 }
 
-/// Index (in `body`) of the last property named `key`.
 fn prop_index(s: &Section, key: &str) -> Option<usize> {
     s.body
         .iter()
@@ -94,8 +90,6 @@ pub(crate) fn set_property(
     Ok(true)
 }
 
-/// Inserts a body item on its own line after property `after` (or right
-/// after the header when `after` is `None` or missing).
 fn insert_line(s: &mut Section, after: Option<&str>, item: BodyItem, eol: &str) {
     let at = after.and_then(|k| prop_index(s, k)).map_or(0, |i| i + 1);
     s.body.insert(at, item);
@@ -103,9 +97,6 @@ fn insert_line(s: &mut Section, after: Option<&str>, item: BodyItem, eol: &str) 
     separate_after(s, at + 1, eol);
 }
 
-/// Makes sure item `i` is followed by a line break: a property may start
-/// right after a closing quote (`text = "a"next = 1` is legal), and nothing
-/// may follow the last item of a section on the same line as the next header.
 fn separate_after(s: &mut Section, i: usize, eol: &str) {
     let needs_break = match s.body.get(i + 1) {
         None => true,
@@ -117,7 +108,6 @@ fn separate_after(s: &mut Section, i: usize, eol: &str) {
     }
 }
 
-/// Makes sure item `i` starts on its own line.
 fn separate_before(s: &mut Section, i: usize, eol: &str) -> usize {
     if i > 0 && matches!(s.body.get(i - 1), Some(BodyItem::Property(_))) {
         s.body.insert(i, BodyItem::Trivia(eol.to_string()));
@@ -151,10 +141,8 @@ pub(crate) fn remove_property(s: &mut Section, key: &str) -> bool {
         .skip(i + 1)
         .any(|b| matches!(b, BodyItem::Property(_)));
     if next_is_trivia && has_later_prop {
-        // `prop \n next` → `next`
         s.body.drain(i..=i + 1);
     } else if i > 0 && matches!(s.body.get(i - 1), Some(BodyItem::Trivia(_))) {
-        // last property: `\n prop \n\n` → `\n\n`
         s.body.drain(i - 1..=i);
     } else {
         s.body.remove(i);
@@ -235,7 +223,6 @@ pub(crate) fn split_trailing(s: &Section) -> (String, String) {
     let text = s.to_text();
     let trimmed_len = text.trim_end_matches([' ', '\t', '\r', '\n']).len();
     let rest = text.get(trimmed_len..).unwrap_or("");
-    // Keep the first line break with the content.
     let first_break = rest.find('\n').map_or(rest.len(), |i| i + 1);
     let content_end = trimmed_len + first_break;
     (
@@ -283,7 +270,6 @@ mod tests {
 
     #[test]
     fn edits_keep_glued_properties_apart() {
-        // `t = "x"u = 1` is legal: a property may follow a closing quote directly.
         let mut s = section("[a]\nt = \"x\"u = 1");
         add_property(&mut s, "v", "2".into(), Some("t"), "\n").unwrap();
         set_property(&mut s, "t", "3".into(), "\n").unwrap();

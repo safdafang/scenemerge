@@ -1,9 +1,5 @@
 name: Godot integration
 
-# Loads merge results with a real headless Godot (spec §8.6): the clean merge
-# cases, and real demo projects merged through `git merge` with scenemerge as
-# merge driver.
-
 on:
   push:
     branches: [main]
@@ -15,7 +11,6 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  # Pinned commit of godotengine/godot-demo-projects (same as tests/fixtures).
   DEMO_PROJECTS_COMMIT: b761b4cd5718a7118f2c95eb55f181d0a5f004f1
 
 jobs:

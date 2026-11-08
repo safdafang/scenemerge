@@ -1,9 +1,5 @@
-//! Deterministic generation of Godot-style identifiers.
-
 use std::collections::HashSet;
 
-/// Godot's `Resource::generate_scene_unique_id` alphabet: because of an
-/// off-by-one (`'z' - 'a'`) it never produces `z` or `9`.
 const ALPHABET: &[u8; 34] = b"abcdefghijklmnopqrstuvwxy012345678";
 
 /// FNV-1a, used to seed the generator from stable inputs so that the same

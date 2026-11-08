@@ -1,8 +1,5 @@
-# Source files are normalised to LF in the repository.
 * text=auto eol=lf
 
-# Test inputs must stay byte-for-byte identical on every platform:
-# the round-trip tests compare raw bytes, and some fixtures are CRLF or have a BOM on purpose.
 tests/fixtures/** -text
 tests/merge-cases/** -text
 crates/*/tests/data/** -text

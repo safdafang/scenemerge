@@ -1,15 +1,5 @@
-//! A small mutation fuzzer that runs on stable Rust and on every platform.
-//!
-//! It mutates the fixture corpus (bit flips, deletions, duplications, splices
-//! and insertion of syntax-significant tokens) and checks two properties:
-//!
-//! 1. parsing never panics;
-//! 2. anything the parser accepts is written back byte for byte.
-//!
-//! Runs for 3 seconds by default; set `FUZZ_SECONDS` for a longer run:
-//! `FUZZ_SECONDS=600 cargo test --release -p godot-text --test fuzz_stable -- --nocapture`
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -27,7 +17,6 @@ struct Rng(u64);
 
 impl Rng {
     fn next(&mut self) -> u64 {
-        // xorshift64*
         self.0 ^= self.0 >> 12;
         self.0 ^= self.0 << 25;
         self.0 ^= self.0 >> 27;
@@ -149,7 +138,6 @@ fn mutation_fuzz_never_panics() {
     for sub in ["demo", "synthetic", "invalid"] {
         for e in fs::read_dir(dir.join(sub)).unwrap().flatten() {
             let bytes = fs::read(e.path()).unwrap();
-            // Keep inputs small so that many iterations run.
             if bytes.len() <= 16 * 1024 {
                 corpus.push(bytes);
             }

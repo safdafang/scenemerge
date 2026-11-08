@@ -1,8 +1,5 @@
 name: Release
 
-# Builds scenemerge for every platform when a tag `v*` is pushed and publishes
-# a GitHub release with the archives, SHA-256 checksums and the CHANGELOG entry.
-
 on:
   push:
     tags: ["v*"]

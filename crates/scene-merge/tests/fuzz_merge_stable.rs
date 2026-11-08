@@ -1,16 +1,5 @@
-//! Stable-Rust fuzzer for the model → diff → merge pipeline.
-//!
-//! Inputs are fixtures with random structural edits (property values, deleted
-//! or duplicated lines, swapped sections) for OURS and THEIRS. Checks:
-//!
-//! * nothing panics;
-//! * if BASE, OURS and THEIRS are all valid, `merge` succeeds in every
-//!   conflict style, and a result without markers is a valid file;
-//! * `diff(x, x)` is always empty.
-//!
-//! `FUZZ_SECONDS=600 cargo test --release -p scene-merge --test fuzz_merge_stable -- --nocapture`
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -61,7 +50,6 @@ const VALUES: &[&str] = &[
     "PackedStringArray(\"a\")",
 ];
 
-/// Line-level structural mutations keep most results parseable.
 fn mutate(rng: &mut Rng, text: &str, others: &[String]) -> String {
     let mut lines: Vec<String> = text.lines().map(str::to_string).collect();
     for _ in 0..=rng.below(3) {
@@ -70,7 +58,6 @@ fn mutate(rng: &mut Rng, text: &str, others: &[String]) -> String {
         }
         let i = rng.below(lines.len());
         match rng.below(7) {
-            // change a property value
             0 | 1 => {
                 if let Some(eq) = lines[i].find(" = ") {
                     if !lines[i].starts_with('[') {
@@ -79,28 +66,23 @@ fn mutate(rng: &mut Rng, text: &str, others: &[String]) -> String {
                     }
                 }
             }
-            // add a property after a header or property
             2 => {
                 let key = format!("fuzz_{}", rng.below(5));
                 let v = VALUES[rng.below(VALUES.len())];
                 lines.insert(i + 1, format!("{key} = {v}"));
             }
-            // delete a line
             3 => {
                 lines.remove(i);
             }
-            // duplicate a line
             4 => {
                 let l = lines[i].clone();
                 lines.insert(i, l);
             }
-            // rename a node
             5 => {
                 if lines[i].starts_with("[node name=\"") {
                     lines[i] = lines[i].replacen("[node name=\"", "[node name=\"Z", 1);
                 }
             }
-            // splice a section header from another file
             _ => {
                 if let Some(o) = others.get(rng.below(others.len())) {
                     let hs: Vec<&str> = o.lines().filter(|l| l.starts_with("[node")).collect();

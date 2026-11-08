@@ -1,14 +1,7 @@
-## Loads every .tscn/.tres under a directory with ResourceLoader and fails if
-## any of them cannot be loaded. Scenes are also instantiated, and the number
-## of nodes created is compared with the number of [node] sections, so that
-## nodes silently dropped by Godot (e.g. because of a wrong `parent=`) are caught.
-##
-## Usage: godot --headless --path <project> -s res://check_load.gd -- <res://dir>
 extends SceneTree
 
 var failures := 0
 var checked := 0
-
 
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
@@ -16,7 +9,6 @@ func _init() -> void:
 	_check_dir(dir)
 	print("checked %d file(s), %d failure(s)" % [checked, failures])
 	quit(1 if failures > 0 or checked == 0 else 0)
-
 
 func _check_dir(path: String) -> void:
 	var d := DirAccess.open(path)
@@ -30,7 +22,6 @@ func _check_dir(path: String) -> void:
 		if f.ends_with(".tscn") or f.ends_with(".tres"):
 			_check_file(path.path_join(f))
 
-
 func _count_sections(path: String) -> int:
 	var text := FileAccess.get_file_as_string(path)
 	var n := 0
@@ -39,17 +30,13 @@ func _count_sections(path: String) -> int:
 			n += 1
 	return n
 
-
 func _count_owned(root: Node, node: Node) -> int:
-	# Nodes saved in this scene file are owned by the scene root; nodes that
-	# come from instanced sub-scenes are owned by those and are not counted.
 	var n := 0
 	for c in node.get_children(true):
 		if c.owner == root:
 			n += 1
 		n += _count_owned(root, c)
 	return n
-
 
 func _check_file(path: String) -> void:
 	checked += 1
@@ -60,8 +47,6 @@ func _check_file(path: String) -> void:
 		return
 	if res is PackedScene:
 		var text := FileAccess.get_file_as_string(path)
-		# Inherited scenes and editable children refer to nodes of stub scenes
-		# that do not exist; only plain scenes are instantiated.
 		if text.contains("parent_id_path") or text.contains("[editable") or _first_node_is_instance(text):
 			print("ok (loaded)       %s" % path)
 			return
@@ -80,7 +65,6 @@ func _check_file(path: String) -> void:
 		print("ok (instantiated) %s" % path)
 	else:
 		print("ok (loaded)       %s" % path)
-
 
 func _first_node_is_instance(text: String) -> bool:
 	for line in text.split("\n"):

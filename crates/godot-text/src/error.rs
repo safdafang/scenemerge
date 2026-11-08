@@ -1,5 +1,3 @@
-//! Parse errors with precise source locations.
-
 use std::fmt;
 use std::path::{Path, PathBuf};
 
@@ -79,7 +77,6 @@ impl fmt::Display for ParseError {
             )?,
             None => write!(f, "{}:{}: {}", self.line, self.column, self.message)?,
         }
-        // Show at most ~100 characters of context around the column.
         let chars: Vec<char> = self.snippet.chars().collect();
         let col0 = self.column.saturating_sub(1).min(chars.len());
         let start = col0.saturating_sub(60);

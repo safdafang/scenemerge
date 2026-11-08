@@ -1,11 +1,5 @@
-//! Property-based tests (spec §8.4), with real fixtures as the base:
-//!
-//! * a random single mutation is reported by `diff` as exactly that change;
-//! * `merge(base, x, base) == x` byte for byte;
-//! * `merge(base, x, x) == x` byte for byte;
-//! * `merge(base, base, x)` is semantically equal to `x`.
-
 #![allow(
+    missing_docs,
     clippy::unwrap_used,
     clippy::expect_used,
     clippy::indexing_slicing,
@@ -22,7 +16,6 @@ use scene_diff::{diff, Change, DiffOptions, Target};
 use scene_merge::{merge, MergeOptions};
 use scene_model::SceneFile;
 
-/// Scene fixtures small enough for many iterations.
 fn corpus() -> &'static Vec<String> {
     static CORPUS: OnceLock<Vec<String>> = OnceLock::new();
     CORPUS.get_or_init(|| {
@@ -61,7 +54,6 @@ fn mutation() -> impl Strategy<Value = Mutation> {
     ]
 }
 
-/// What the mutation should look like in the diff.
 #[derive(Debug)]
 enum Expect {
     PropChanged(String, String),
@@ -89,14 +81,11 @@ fn pick<T: Clone>(v: &[T], r: u64) -> Option<T> {
     }
 }
 
-/// Applies a mutation to `text`; returns the new text and the expected change,
-/// or `None` when the mutation does not apply to this file.
 fn apply(text: &str, m: &Mutation, r1: u64, r2: u64) -> Option<(String, Expect)> {
     let model = SceneFile::parse(text).ok()?;
     let mut doc = model.doc.clone();
     let nodes = node_sections(&doc);
     let node_index = |section: usize| model.nodes.iter().position(|n| n.section == section);
-    // Nodes that are referenced by path from somewhere else are not renamed/deleted.
     let referenced = |path: &str| {
         model.connections.iter().any(|c| {
             c.from == path
@@ -122,7 +111,6 @@ fn apply(text: &str, m: &Mutation, r1: u64, r2: u64) -> Option<(String, Expect)>
                 .collect();
             let (s, key) = pick(&candidates, r1)?;
             let path = model.nodes[node_index(s)?].path.clone();
-            // Duplicate keys make "the" property ambiguous.
             if doc.sections[s]
                 .properties()
                 .filter(|p| p.key == key)
@@ -150,7 +138,6 @@ fn apply(text: &str, m: &Mutation, r1: u64, r2: u64) -> Option<(String, Expect)>
                     .position(|b| matches!(b, BodyItem::Property(p) if p.key == key))?;
                 sec.body.remove(i);
                 if matches!(sec.body.get(i), Some(BodyItem::Trivia(_))) && i > 0 {
-                    // keep the line structure valid: drop the line break
                     sec.body.remove(i - 1);
                 }
                 Some((doc.to_text(), Expect::PropRemoved(path, key)))
@@ -208,8 +195,6 @@ fn apply(text: &str, m: &Mutation, r1: u64, r2: u64) -> Option<(String, Expect)>
                 .collect();
             let s = pick(&leaves, r1)?;
             let path = model.nodes[node_index(s)?].path.clone();
-            // The previous section keeps its own separator; make sure the file
-            // still ends with a line break.
             doc.sections.remove(s);
             let mut t = doc.to_text();
             if !t.ends_with('\n') {
@@ -237,11 +222,9 @@ fn apply(text: &str, m: &Mutation, r1: u64, r2: u64) -> Option<(String, Expect)>
             .unwrap();
             let mut sec = Section::new(header);
             sec.body.push(BodyItem::Trivia("\n\n".into()));
-            // Insert after the last node section.
             let last_node = *nodes.last()?;
             let (before, after) = doc.sections.split_at(last_node + 1);
             let mut sections = before.to_vec();
-            // Ensure a blank line before the new section.
             let mut prev_text = sections.last()?.to_text();
             if !prev_text.ends_with("\n\n") {
                 if let Some(last) = sections.last_mut() {
@@ -344,8 +327,6 @@ proptest! {
         file in 0usize..1000, m1 in mutation(), m2 in mutation(),
         r1 in any::<u64>(), r2 in any::<u64>(), r3 in any::<u64>(), r4 in any::<u64>(),
     ) {
-        // Two mutations of the same base on two branches merge into a file
-        // that contains both (when they touch different things).
         let texts = corpus();
         let text = &texts[file % texts.len()];
         let Some((ours_text, e1)) = apply(text, &m1, r1, r2) else { return Ok(()) };
@@ -355,7 +336,6 @@ proptest! {
             | Expect::Renamed(p, _) | Expect::Removed(p) | Expect::Added(p) => p.clone(),
         };
         let (t1, t2) = (target(&e1), target(&e2));
-        // Skip overlapping edits (same node, or one inside the other).
         if t1 == t2 || t1.starts_with(&format!("{t2}/")) || t2.starts_with(&format!("{t1}/"))
             || t1 == "." || t2 == "." {
             return Ok(());
@@ -366,12 +346,10 @@ proptest! {
         let out = merge(&base, &ours, &theirs, &MergeOptions::default()).unwrap();
         prop_assert!(out.is_clean(), "conflicts: {:?}", out.conflicts);
         let merged = SceneFile::parse(&out.text).unwrap();
-        // Everything theirs changed is in the result relative to ours...
         let d_theirs = diff(&base, &theirs, &DiffOptions::default());
         let d_result = diff(&ours, &merged, &DiffOptions::default());
         prop_assert_eq!(d_theirs.changes.len(), d_result.changes.len(),
             "theirs: {:#?}\nresult vs ours: {:#?}\n{}", d_theirs.changes, d_result.changes, out.text);
-        // ...and everything ours changed is in the result relative to theirs.
         let d_ours = diff(&base, &ours, &DiffOptions::default());
         let d_result2 = diff(&theirs, &merged, &DiffOptions::default());
         prop_assert_eq!(d_ours.changes.len(), d_result2.changes.len(),
@@ -381,7 +359,6 @@ proptest! {
 
 #[test]
 fn mutations_apply_to_most_fixtures() {
-    // Guard against the property tests silently skipping most inputs.
     let texts = corpus();
     assert!(texts.len() >= 50, "{}", texts.len());
     for m in [

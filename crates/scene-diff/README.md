@@ -1,7 +1,7 @@
 # scene-diff
 
 Semantic diff of Godot 4 scenes and resources, part of
-[scenemerge](https://github.com/OWNER/scenemerge).
+[scenemerge](https://github.com/safdafang/scenemerge).
 
 * `diff(old, new, &options)` returns typed `Change`s (`NodeAdded`,
   `NodeRenamed`, `PropertyChanged` with component breakdown, `ConnectionAdded`, …).

@@ -1,5 +1,3 @@
-//! Human-readable rendering of a [`FileDiff`].
-
 use std::fmt::Write as _;
 
 use anstyle::{AnsiColor, Style};
@@ -69,7 +67,6 @@ struct Group {
     details: Vec<(Option<Mark>, String)>,
 }
 
-/// `(group key, default headline, headline, detail line)` for one change.
 type GroupParts = (
     String,
     String,
@@ -452,7 +449,6 @@ fn push(
             if last.head.is_none() {
                 last.head = head;
             } else if let Some(h) = head {
-                // A second headline for the same subject (e.g. moved + renamed).
                 last.details.insert(0, (Some(h.0), h.1));
             }
             last.details.extend(details);

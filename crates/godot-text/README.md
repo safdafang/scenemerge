@@ -2,7 +2,7 @@
 
 Lossless lexer, parser and writer for Godot 4 text scenes and resources
 (`.tscn`, `.tres`; `format=3` and `format=4`), part of
-[scenemerge](https://github.com/OWNER/scenemerge).
+[scenemerge](https://github.com/safdafang/scenemerge).
 
 * Ports Godot's `VariantParser` tokenizer and value grammar (every Variant
   literal, typed arrays/dictionaries, `Object(...)`, packed arrays, …).

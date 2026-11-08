@@ -1,5 +1,3 @@
-//! Token-level rewriting of resource references inside raw value text.
-
 use crate::error::ParseError;
 use crate::lexer::{Lexer, Punct, TokKind};
 use crate::value::{escape_multiline, RefKind};
@@ -22,7 +20,6 @@ pub fn rewrite_refs(
     let mut lx = Lexer::new(raw);
     let mut out = String::with_capacity(raw.len());
     let mut copied = 0;
-    // States: 0 = idle, 1 = saw ExtResource/SubResource, 2 = saw '('
     let mut pending: Option<RefKind> = None;
     let mut saw_paren = false;
     loop {
@@ -86,7 +83,6 @@ mod tests {
             out,
             "{\n\"ExtResource\": ExtResource( \"Ext-1\" ), ; c\n\"k\": SubResource(\"Sub-A\")\n}"
         );
-        // old-style numeric ids become strings
         assert_eq!(
             rewrite_refs("ExtResource(3)", |_, _| Some("3_abc".into())).unwrap(),
             "ExtResource(\"3_abc\")"

@@ -1,9 +1,3 @@
-//! The three-way merge algorithm.
-//!
-//! The result is built from OURS (so that unchanged sections are copied byte
-//! for byte and the diff of the result against OURS is minimal); THEIRS'
-//! changes relative to BASE are applied on top.
-
 use std::collections::{HashMap, HashSet};
 
 use godot_text::{rewrite_refs, BodyItem, Header, RefKind, Section, Value};
@@ -46,8 +40,6 @@ impl MergeOutput {
     }
 }
 
-// Private-use characters that tag conflict markers until the final text is
-// produced (so that the report can tell the line of every conflict).
 const TAG_OPEN: char = '\u{E000}';
 const TAG_CLOSE: char = '\u{E001}';
 
@@ -116,7 +108,6 @@ struct OutNode {
     parent: OutParent,
 }
 
-/// Outcome of a three-way comparison.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Decision {
     KeepOurs,
@@ -150,7 +141,6 @@ fn prop_value<'a>(s: Option<&'a Section>, key: &str) -> Option<&'a godot_text::P
     s.and_then(|s| s.property(key))
 }
 
-/// Header fields where a disagreement is not a conflict (OURS wins).
 const SOFT_FIELDS: &[&str] = &[
     "unique_id",
     "parent_id_path",
@@ -159,7 +149,6 @@ const SOFT_FIELDS: &[&str] = &[
     "to_uid_path",
 ];
 
-/// Edits to apply to a section, computed before mutating it.
 enum Edit {
     SetField(String, Option<String>),
     SetProp(String, String),
@@ -219,7 +208,6 @@ struct Merger<'a> {
     resolutions: Vec<Resolution>,
 }
 
-/// Index of the section of entity `i` in file `f`.
 fn sec(f: &SceneFile, section: usize) -> Option<&Section> {
     f.doc.sections.get(section)
 }
@@ -352,8 +340,6 @@ impl<'a> Merger<'a> {
         }
     }
 
-    // ------------------------------------------------------------- utilities
-
     fn add_conflict(&mut self, c: Conflict) -> usize {
         self.conflicts.push(c);
         self.conflicts.len() - 1
@@ -363,15 +349,12 @@ impl<'a> Merger<'a> {
         self.opts.conflict
     }
 
-    /// A conflict block, tagged with the conflict index.
     fn block(&self, idx: usize, ours: &str, theirs: &str) -> String {
         let mut style = self.opts.markers.clone();
         style.ours = format!("{}{TAG_OPEN}{idx}{TAG_CLOSE}", style.ours);
         style.block(ours, theirs, self.eol)
     }
 
-    /// Rewrites resource references of a raw text from THEIRS into the output
-    /// id space, importing resources on demand, and converts line endings.
     fn import_raw(&mut self, raw: &str) -> String {
         let mut wanted: Vec<(RefKind, String)> = Vec::new();
         let _ = rewrite_refs(raw, |k, id| {
@@ -395,7 +378,6 @@ impl<'a> Merger<'a> {
         with_eol(&out, self.eol)
     }
 
-    /// Records the out ids referenced by a (rewritten) raw text so that GC keeps them.
     fn keep_refs_of(&mut self, raw: &str) {
         let mut found = Vec::new();
         let _ = rewrite_refs(raw, |k, id| {
@@ -421,7 +403,6 @@ impl<'a> Merger<'a> {
             .collect()
     }
 
-    /// Output id for THEIRS' ext-resource `id`.
     fn import_ext(&mut self, id: &str) -> String {
         if let Some(v) = self.t_ext_map.get(id) {
             return v.clone();
@@ -429,7 +410,6 @@ impl<'a> Merger<'a> {
         let Some(j) = self.theirs.ext_by_id(id) else {
             return id.to_string();
         };
-        // Same file in OURS (by uid, then path)?
         if let Some(i) = self.m_ot.ext_b_to_a.get(j).copied().flatten() {
             if let Some(x) = self.o_ext.get(i).copied().flatten() {
                 if let Some(e) = self.exts.get_mut(x) {
@@ -441,7 +421,6 @@ impl<'a> Merger<'a> {
                 }
             }
         }
-        // New in the output.
         let Some(te) = self.theirs.ext_resources.get(j) else {
             return id.to_string();
         };
@@ -470,7 +449,6 @@ impl<'a> Merger<'a> {
         out_id
     }
 
-    /// Output id for THEIRS' sub-resource `id`.
     fn import_sub(&mut self, id: &str) -> String {
         if let Some(v) = self.t_sub_map.get(id) {
             return v.clone();
@@ -478,8 +456,6 @@ impl<'a> Merger<'a> {
         let Some(j) = self.theirs.sub_by_id(id) else {
             return id.to_string();
         };
-        // The same sub-resource as one of ours: via BASE, or added on both
-        // sides with identical content.
         let via_base = self
             .m_bt
             .sub_b_to_a
@@ -513,7 +489,6 @@ impl<'a> Merger<'a> {
             }
         }
         if !self.importing_subs.insert(id.to_string()) {
-            // Reference cycle (invalid input); keep the id.
             return id.to_string();
         }
         let Some(ts) = self.theirs.sub_resources.get(j) else {
@@ -523,7 +498,6 @@ impl<'a> Merger<'a> {
             return id.to_string();
         };
         let type_name = ts.type_name.clone();
-        // Import the content first (dependencies end up before this one).
         let mut out = OutSec::new(s, Origin::New);
         self.import_section_refs(&mut out.sec);
         let used = self.used_sub_ids();
@@ -546,7 +520,6 @@ impl<'a> Merger<'a> {
         out_id
     }
 
-    /// Rewrites every reference in a section copied from THEIRS.
     fn import_section_refs(&mut self, s: &mut Section) {
         let fields: Vec<(String, String)> = s
             .header
@@ -577,10 +550,6 @@ impl<'a> Merger<'a> {
         s.body = items;
     }
 
-    // ------------------------------------------------- generic 3-way merges
-
-    /// Three-way merge of header fields (except `skip`). Returns the edits and
-    /// the names of conflicting fields.
     fn merge_fields(
         &mut self,
         b: Option<&Header>,
@@ -612,8 +581,6 @@ impl<'a> Merger<'a> {
                     let raw = raw.map(|r| self.import_raw(&r));
                     edits.push(Edit::SetField(key, raw));
                 }
-                // Identity fields that both sides may add independently (e.g.
-                // both branches re-saved with Godot 4.6): keep ours silently.
                 Decision::Conflict if SOFT_FIELDS.contains(&key.as_str()) => {}
                 Decision::Conflict => conflicts.push(key),
             }
@@ -621,8 +588,6 @@ impl<'a> Merger<'a> {
         (edits, conflicts)
     }
 
-    /// Three-way merge of properties. `b`/`t` are `None` when the entity does
-    /// not exist on that side (two-way merge for entities added on both sides).
     fn merge_props(
         &mut self,
         b: Option<&Section>,
@@ -648,7 +613,6 @@ impl<'a> Merger<'a> {
                 pt.map(|p| &p.value),
             );
             let d = if two_way {
-                // Added on both sides: a property set on only one side is kept.
                 match (vo, vt) {
                     (Some(x), Some(y)) if !self.m_ot.values_equal(x, y, self.eps) => {
                         Decision::Conflict
@@ -763,8 +727,6 @@ impl<'a> Merger<'a> {
         }
     }
 
-    /// Header conflict handling: records the conflict and either applies
-    /// THEIRS' values, keeps OURS, or prepares a marker variant.
     fn header_conflict(
         &mut self,
         out: &mut OutSec,
@@ -802,7 +764,6 @@ impl<'a> Merger<'a> {
             resolution,
             line: None,
         });
-        // Their variant of our header.
         let mut variant = out.sec.header.clone();
         for k in fields {
             match t.and_then(|h| h.field(k)).map(|f| f.raw_value.clone()) {
@@ -825,8 +786,6 @@ impl<'a> Merger<'a> {
         }
     }
 
-    // ------------------------------------------------------------- header
-
     fn merge_header(&mut self) {
         let b = sec(self.base, 0).map(|s| &s.header);
         let t = sec(self.theirs, 0).map(|s| &s.header);
@@ -843,7 +802,6 @@ impl<'a> Merger<'a> {
             "header".into(),
             b,
         );
-        // format: the newer of both sides.
         let fo = self.ours.descriptor.format;
         let ft = self.theirs.descriptor.format;
         if ft > fo {
@@ -851,8 +809,6 @@ impl<'a> Merger<'a> {
         }
         self.header = out;
     }
-
-    // ---------------------------------------------------------- resources
 
     fn merge_ext_resources(&mut self) {
         for (bi, _) in self.base.ext_resources.iter().enumerate() {
@@ -980,13 +936,10 @@ impl<'a> Merger<'a> {
         self.resource = Some(out);
     }
 
-    // ------------------------------------------------------------- nodes
-
     fn node_sec<'f>(&self, f: &'f SceneFile, i: usize) -> Option<&'f Section> {
         f.nodes.get(i).and_then(|n| sec(f, n.section))
     }
 
-    /// Whether node `i` of `f` (matched to base node `b` by `m`) differs from BASE.
     fn node_changed(&self, m: &Matching, f: &SceneFile, i: usize, b: usize) -> bool {
         let (Some(nb), Some(nf)) = (self.base.nodes.get(b), f.nodes.get(i)) else {
             return true;
@@ -1019,7 +972,6 @@ impl<'a> Merger<'a> {
         fields_differ || !m.props_equal(&nb.props, &nf.props, self.eps)
     }
 
-    /// Their prev sibling of THEIRS node `j` that exists in the output, as an out index.
     fn theirs_prev_sibling_out(&self, j: usize) -> Option<usize> {
         let tn = self.theirs.nodes.get(j)?;
         let siblings = self.theirs_children.get(&tn.parent)?;
@@ -1065,7 +1017,6 @@ impl<'a> Merger<'a> {
         false
     }
 
-    /// Position just after `a`'s subtree in `order` (scanning forward from `a`).
     fn block_end(&self, a: usize) -> usize {
         let Some(start) = self.order.iter().position(|&n| n == a) else {
             return self.order.len();
@@ -1080,7 +1031,6 @@ impl<'a> Merger<'a> {
         end
     }
 
-    /// Positions in `order` of `x` and its descendants.
     fn block_positions(&self, x: usize) -> Vec<usize> {
         self.order
             .iter()
@@ -1090,10 +1040,7 @@ impl<'a> Merger<'a> {
             .collect()
     }
 
-    /// Moves (or inserts) node `x` with its subtree to sit after `anchor`'s
-    /// subtree, or directly after its parent when `anchor` is `None`.
     fn place(&mut self, x: usize, anchor: Option<usize>) {
-        // A node that is not placed yet has no placed descendants either.
         let block: Vec<usize> = if self.in_order.get(x).copied().unwrap_or(false) {
             let block: Vec<usize> = self
                 .block_positions(x)
@@ -1118,8 +1065,6 @@ impl<'a> Merger<'a> {
             },
         };
         let mut insert_at = insert_at.min(self.order.len());
-        // Siblings that only OURS added at this position come first (like a
-        // textual merge, which puts our lines before theirs).
         let parent = self.nodes.get(x).map(|n| n.parent.clone());
         while let Some(&next) = self.order.get(insert_at) {
             let ours_only_sibling = self.nodes.get(next).is_some_and(|n| {
@@ -1144,12 +1089,10 @@ impl<'a> Merger<'a> {
         self.order.extend(tail);
     }
 
-    /// Imports THEIRS node `j` under `parent` (not yet placed).
     fn import_node(&mut self, j: usize, parent: OutParent) -> Option<usize> {
         let tn = self.theirs.nodes.get(j)?;
         let mut s = self.node_sec(self.theirs, j)?.clone();
         self.import_section_refs(&mut s);
-        // unique_id collisions.
         if let Some(u) = tn.unique_id {
             if self.used_uids.contains(&u) {
                 let new = self.ids.unique_node_id(&self.used_uids);
@@ -1182,7 +1125,6 @@ impl<'a> Merger<'a> {
 
     fn merge_nodes(&mut self) {
         let (base, ours, theirs) = (self.base, self.ours, self.theirs);
-        // 1. Matched in all three: link THEIRS to out nodes.
         for (bi, _) in base.nodes.iter().enumerate() {
             let oi = self.m_bo.node_a_to_b.get(bi).copied().flatten();
             let ti = self.m_bt.node_a_to_b.get(bi).copied().flatten();
@@ -1197,7 +1139,6 @@ impl<'a> Merger<'a> {
                 }
             }
         }
-        // Nodes added on both sides at the same place are the same node.
         for (j, _) in theirs.nodes.iter().enumerate() {
             if self.m_bt.node_b_to_a.get(j).copied().flatten().is_some() {
                 continue;
@@ -1205,9 +1146,6 @@ impl<'a> Merger<'a> {
             let Some(oi) = self.m_ot.node_b_to_a.get(j).copied().flatten() else {
                 continue;
             };
-            // Only exact matches: a similarity match between two new nodes
-            // most likely pairs two different nodes, and so does a unique_id
-            // match at a different place (that is a unique_id collision).
             let same_place = match (ours.nodes.get(oi), theirs.nodes.get(j)) {
                 (Some(on), Some(tn)) => {
                     on.name == tn.name
@@ -1239,7 +1177,6 @@ impl<'a> Merger<'a> {
             }
         }
 
-        // 2. Attributes and properties of nodes present in OURS and THEIRS.
         let mut pending_moves: Vec<(usize, ParentRef)> = Vec::new();
         for x in 0..self.nodes.len() {
             let (Some(oi), Some(ti)) = self
@@ -1250,8 +1187,6 @@ impl<'a> Merger<'a> {
                 continue;
             };
             let bi = self.m_bo.node_b_to_a.get(oi).copied().flatten();
-            // Fast path: THEIRS did not touch this node (byte-identical section,
-            // same parent): nothing to merge.
             if let Some(b) = bi {
                 let same_text = match (self.node_sec(base, b), self.node_sec(theirs, ti)) {
                     (Some(sb), Some(st)) => sections_identical(sb, st),
@@ -1283,7 +1218,6 @@ impl<'a> Merger<'a> {
             let mut out = n.s.clone();
             let osec = out.sec.clone();
 
-            // Name (rename).
             let (nb, no, nt) = (
                 bi.and_then(|b| base.nodes.get(b)).map(|n| n.name.clone()),
                 ours.nodes.get(oi).map(|n| n.name.clone()),
@@ -1302,7 +1236,6 @@ impl<'a> Merger<'a> {
                 _ => {}
             }
 
-            // Parent (move).
             let parent_b = bi.and_then(|b| base.nodes.get(b)).map(|n| n.parent.clone());
             let parent_o = ours.nodes.get(oi).map(|n| n.parent.clone());
             let parent_t = theirs.nodes.get(ti).map(|n| n.parent.clone());
@@ -1325,10 +1258,7 @@ impl<'a> Merger<'a> {
                 let target_parent = parent_t.as_ref().and_then(|p| self.out_parent_of_theirs(p));
                 let same_ot = target_parent.as_ref() == Some(&n.parent);
                 if same_ot {
-                    // Moved the same way on both sides.
                 } else if same_bo {
-                    // Resolved after THEIRS' new nodes exist (the new parent
-                    // may be one of them).
                     if let Some(p) = parent_t.clone() {
                         pending_moves.push((x, p));
                     }
@@ -1362,8 +1292,6 @@ impl<'a> Merger<'a> {
             } else {
                 ConflictKind::NodeAttribute
             };
-            // The parent field is recomputed at write time; give the marker
-            // variant their parent path.
             let th = ts.as_ref().map(|s| s.header.clone());
             let shown_conflicts: Vec<String> = header_conflicts.clone();
             let style = self.style();
@@ -1394,11 +1322,8 @@ impl<'a> Merger<'a> {
             }
         }
 
-        // 3. Deleted by OURS but changed by THEIRS; and THEIRS' additions.
         self.theirs_additions();
 
-        // 4. Moves done by THEIRS (before deletions, so that a node moved out
-        //    of a deleted subtree is not part of it any more).
         for (x, pt) in pending_moves {
             let target = self.out_parent_of_theirs(&pt).filter(|p| match p {
                 OutParent::Node(q) => *q != x && !self.is_descendant(*q, x),
@@ -1415,7 +1340,6 @@ impl<'a> Merger<'a> {
                     }
                 }
                 None => {
-                    // Their new parent is gone (deleted by OURS): keep ours.
                     let Some(mut out) = self.nodes.get(x).map(|n| n.s.clone()) else {
                         continue;
                     };
@@ -1441,17 +1365,14 @@ impl<'a> Merger<'a> {
             }
         }
 
-        // 5. Deleted by THEIRS.
         self.apply_theirs_deletions();
 
-        // 6. Reorders done by THEIRS.
         self.apply_theirs_reorders();
         self.check_name_collisions();
     }
 
     fn apply_theirs_deletions(&mut self) {
         let (base, ours) = (self.base, self.ours);
-        // Candidates: in OURS and BASE, not in THEIRS.
         let deleted: Vec<usize> = (0..self.nodes.len())
             .filter(|&x| {
                 let Some(n) = self.nodes.get(x) else {
@@ -1469,7 +1390,6 @@ impl<'a> Merger<'a> {
             })
             .collect();
         let deleted_set: HashSet<usize> = deleted.iter().copied().collect();
-        // Roots of deleted subtrees.
         let roots: Vec<usize> = deleted
             .iter()
             .copied()
@@ -1484,7 +1404,7 @@ impl<'a> Merger<'a> {
                 .collect();
             let dirty = subtree.iter().any(|&n| {
                 if !deleted_set.contains(&n) {
-                    return true; // added by OURS, or kept/moved by THEIRS
+                    return true;
                 }
                 let Some(oi) = self.nodes.get(n).and_then(|n| n.ours) else {
                     return true;
@@ -1536,12 +1456,10 @@ impl<'a> Merger<'a> {
     fn theirs_additions(&mut self) {
         let (base, theirs) = (self.base, self.theirs);
         let mut handled: HashSet<usize> = HashSet::new();
-        // Deleted by OURS, present in THEIRS.
         for (bi, _) in base.nodes.iter().enumerate() {
             let oi = self.m_bo.node_a_to_b.get(bi).copied().flatten();
             let ti = self.m_bt.node_a_to_b.get(bi).copied().flatten();
             let (None, Some(ti)) = (oi, ti) else { continue };
-            // Only the root of each deleted subtree.
             let parent_deleted_by_ours = match base.nodes.get(bi).map(|n| &n.parent) {
                 Some(ParentRef::Node(pb)) => {
                     self.m_bo.node_a_to_b.get(*pb).copied().flatten().is_none()
@@ -1557,16 +1475,16 @@ impl<'a> Merger<'a> {
             for &k in &subtree {
                 handled.insert(k);
             }
-            let dirty = subtree.iter().any(|&k| {
-                match self.m_bt.node_b_to_a.get(k).copied().flatten() {
-                    None => true, // added by THEIRS under a node OURS deleted
-                    Some(b) => {
-                        // A node OURS kept (e.g. moved out) is not part of the deletion.
-                        self.m_bo.node_a_to_b.get(b).copied().flatten().is_none()
-                            && self.node_changed(&self.m_bt, theirs, k, b)
-                    }
-                }
-            });
+            let dirty =
+                subtree
+                    .iter()
+                    .any(|&k| match self.m_bt.node_b_to_a.get(k).copied().flatten() {
+                        None => true,
+                        Some(b) => {
+                            self.m_bo.node_a_to_b.get(b).copied().flatten().is_none()
+                                && self.node_changed(&self.m_bt, theirs, k, b)
+                        }
+                    });
             if !dirty {
                 continue;
             }
@@ -1589,7 +1507,6 @@ impl<'a> Merger<'a> {
             if resolution == ConflictStyle::Ours {
                 continue;
             }
-            // Re-create THEIRS' subtree (nodes OURS still has are skipped).
             for &k in &subtree {
                 if self.t2out.get(k).copied().flatten().is_some() {
                     continue;
@@ -1612,7 +1529,6 @@ impl<'a> Merger<'a> {
                 }
             }
         }
-        // Added by THEIRS.
         for (j, tn) in theirs.nodes.iter().enumerate() {
             if handled.contains(&j)
                 || self.t2out.get(j).copied().flatten().is_some()
@@ -1621,7 +1537,6 @@ impl<'a> Merger<'a> {
                 continue;
             }
             let Some(parent) = self.out_parent_of_theirs(&tn.parent) else {
-                // Parent deleted by OURS: covered by the conflict above.
                 continue;
             };
             if let Some(x) = self.import_node(j, parent) {
@@ -1631,15 +1546,12 @@ impl<'a> Merger<'a> {
         }
     }
 
-    /// Applies sibling reorders made by THEIRS when OURS kept the base order.
     fn apply_theirs_reorders(&mut self) {
         let (base, ours, theirs) = (self.base, self.ours, self.theirs);
         let in_all = |b: usize| {
             self.m_bo.node_a_to_b.get(b).copied().flatten().is_some()
                 && self.m_bt.node_a_to_b.get(b).copied().flatten().is_some()
         };
-        // For every node of `f`, its previous sibling among the nodes present
-        // in all three files, as a base index. One pass per file.
         let prev_siblings = |f: &SceneFile, to_base: &dyn Fn(usize) -> Option<usize>| {
             let mut last: HashMap<&ParentRef, Option<usize>> = HashMap::new();
             let mut out = Vec::with_capacity(f.nodes.len());
@@ -1677,7 +1589,6 @@ impl<'a> Merger<'a> {
         }
     }
 
-    /// Two live siblings with the same name are invalid: revert THEIRS' rename.
     fn check_name_collisions(&mut self) {
         let mut seen: HashMap<(OutParent, String), usize> = HashMap::new();
         let live: Vec<usize> = self
@@ -1708,8 +1619,6 @@ impl<'a> Merger<'a> {
                     line: None,
                 });
                 let _ = other;
-                // Keep a valid tree in every mode: our name if we have one,
-                // otherwise a unique suffix.
                 let fallback = ours_name
                     .filter(|o| *o != n.name)
                     .unwrap_or_else(|| format!("{}2", n.name));
@@ -1727,8 +1636,6 @@ impl<'a> Merger<'a> {
             }
         }
     }
-
-    // ------------------------------------------------------ paths & connections
 
     fn final_path(&self, x: usize) -> String {
         let mut parts: Vec<String> = Vec::new();
@@ -1759,7 +1666,6 @@ impl<'a> Merger<'a> {
         parts.join("/")
     }
 
-    /// Translates a node path of `f` into the output's naming.
     fn translate(&self, f: Which, path: &str) -> String {
         let file = match f {
             Which::Base => self.base,
@@ -1831,7 +1737,6 @@ impl<'a> Merger<'a> {
                     k: &(String, String, String, String)| {
             keys.iter().position(|x| x == k)
         };
-        // Update OURS' connections (endpoint renames, attribute merges, deletions).
         for (i, ko) in keys_o.iter().enumerate() {
             let Some(mut out) = self.conns.get(i).cloned() else {
                 continue;
@@ -1847,7 +1752,6 @@ impl<'a> Merger<'a> {
             let target = format!("connection:{}:{}->{}::{}", ko.0, ko.1, ko.2, ko.3);
             match (bs, ts) {
                 (Some(_), None) => {
-                    // THEIRS deleted it.
                     let oh = &out.sec.header;
                     let unchanged = bs.is_some_and(|b| {
                         b.header.fields.iter().chain(oh.fields.iter()).all(|f| {
@@ -1893,7 +1797,6 @@ impl<'a> Merger<'a> {
                             &["signal", "from", "to", "method"],
                         )
                     } else {
-                        // Added on both sides: conflicting attributes only if both set them differently.
                         let mut c = Vec::new();
                         for f in th.fields.iter().chain(oh.fields.iter()) {
                             let k = f.key.as_str();
@@ -1918,14 +1821,13 @@ impl<'a> Merger<'a> {
                         bh.as_ref(),
                     );
                 }
-                (None, None) => {} // added by OURS
+                (None, None) => {}
             }
             set_endpoints(&mut out.sec, &ko.1, &ko.2);
             if let Some(slot) = self.conns.get_mut(i) {
                 *slot = out;
             }
         }
-        // THEIRS' connections that OURS does not have.
         for (j, kt) in keys_t.iter().enumerate() {
             if find(&keys_o, kt).is_some() {
                 continue;
@@ -1938,14 +1840,12 @@ impl<'a> Merger<'a> {
             };
             match find(&keys_b, kt) {
                 None => {
-                    // Added by THEIRS.
                     let mut s = ts.clone();
                     self.import_section_refs(&mut s);
                     set_endpoints(&mut s, &kt.1, &kt.2);
                     self.conns.push(OutSec::new(s, Origin::New));
                 }
                 Some(bi) => {
-                    // Deleted by OURS; a conflict if THEIRS changed it.
                     let Some(bs) = base.connections.get(bi).and_then(|c| sec(base, c.section))
                     else {
                         continue;
@@ -2038,9 +1938,6 @@ impl<'a> Merger<'a> {
         }
     }
 
-    // ----------------------------------------------------------- finishing
-
-    /// Removes ext/sub resources that THEIRS deleted and nothing references.
     fn collect_garbage(&mut self) {
         let mut ext_refs: HashSet<String> = HashSet::new();
         let mut sub_refs: HashSet<String> = HashSet::new();
@@ -2083,7 +1980,6 @@ impl<'a> Merger<'a> {
                 RefKind::Sub => sub_refs.insert(id.clone()),
             };
         }
-        // Sub-resources reachable from live content (and from non-removable subs).
         let mut changed = true;
         while changed {
             changed = false;
@@ -2117,7 +2013,6 @@ impl<'a> Merger<'a> {
         }
     }
 
-    /// Orders sub-resources so that each one is defined before it is used.
     fn sort_subs(&mut self) {
         let live: Vec<usize> = (0..self.subs.len())
             .filter(|&i| self.subs.get(i).is_some_and(|s| !s.removed))
@@ -2141,7 +2036,7 @@ impl<'a> Merger<'a> {
             }
             out
         };
-        let mut state = vec![0u8; self.subs.len()]; // 0 new, 1 visiting, 2 done
+        let mut state = vec![0u8; self.subs.len()];
         let mut sorted = Vec::new();
         fn visit(
             i: usize,
@@ -2177,7 +2072,6 @@ impl<'a> Merger<'a> {
     }
 
     fn finish_nodes(&mut self) {
-        // Parent fields from the final tree.
         let order = self.order.clone();
         for x in order {
             let Some(n) = self.nodes.get(x).cloned() else {
@@ -2223,8 +2117,6 @@ impl<'a> Merger<'a> {
     }
 
     fn finish_header(&mut self) {
-        // load_steps (pre-4.6 files): resources + 1, updated only when the
-        // number of resources changed, so that an unchanged file stays unchanged.
         let n_res = self.exts.iter().filter(|e| !e.removed).count() + self.subs.len();
         let n_ours = self.ours.ext_resources.len() + self.ours.sub_resources.len();
         if self.header.sec.header.field("load_steps").is_some() && n_res != n_ours {
@@ -2234,7 +2126,6 @@ impl<'a> Merger<'a> {
                 .header
                 .set_field("load_steps", (n_res + 1).to_string());
         }
-        // Content that needs format 4 (see DECISIONS.md D6), when it came from THEIRS.
         let out_needs4 = needs_format4(
             self.subs
                 .iter()
@@ -2251,8 +2142,6 @@ impl<'a> Merger<'a> {
             let _ = self.header.sec.header.set_field("format", "4".into());
         }
     }
-
-    // --------------------------------------------------------------- write
 
     fn write(&self) -> (String, Vec<(usize, usize)>) {
         let mut seq: Vec<(&OutSec, &'static str)> = vec![(&self.header, "gd")];
@@ -2291,7 +2180,6 @@ impl<'a> Merger<'a> {
                 .map(|s| (s, "editable")),
         );
 
-        // Successor of each OURS section in OURS (to keep original separators).
         let ours_secs = &self.ours.doc.sections;
         let ours_last = ours_secs.len().saturating_sub(1);
         let final_sep = ours_secs
@@ -2308,7 +2196,6 @@ impl<'a> Merger<'a> {
         let mut i = 0;
         while i < seq.len() {
             let Some(&(s, kind)) = seq.get(i) else { break };
-            // Whole-section wraps: group consecutive sections of the same conflict.
             if let Some((ci, side)) = s.wrap {
                 let mut j = i;
                 let mut inner = String::new();
@@ -2383,8 +2270,6 @@ impl<'a> Merger<'a> {
     }
 }
 
-/// For every OURS section in the output, the OURS section that followed it
-/// in OURS among those still in the output.
 fn live_ours_successors(m: &Merger<'_>) -> HashMap<usize, usize> {
     let mut live: Vec<usize> = std::iter::once(&m.header)
         .chain(m.exts.iter())
@@ -2408,8 +2293,6 @@ fn live_ours_successors(m: &Merger<'_>) -> HashMap<usize, usize> {
         .collect()
 }
 
-/// Godot's separators: no blank line between consecutive ext resources,
-/// connections or editables, one blank line everywhere else.
 fn default_sep(kind: &str, next: &str, eol: &'static str) -> &'static str {
     if kind == next && matches!(kind, "ext_resource" | "connection" | "editable") {
         ""
@@ -2418,7 +2301,6 @@ fn default_sep(kind: &str, next: &str, eol: &'static str) -> &'static str {
     }
 }
 
-/// Removes conflict tags from the text and returns (text, [(conflict, line)]).
 fn extract_tags(text: &str, marker_size: usize) -> (String, Vec<(usize, usize)>) {
     if !text.contains(TAG_OPEN) {
         return (text.to_string(), Vec::new());
@@ -2445,7 +2327,6 @@ fn extract_tags(text: &str, marker_size: usize) -> (String, Vec<(usize, usize)>)
     (out, lines)
 }
 
-/// Whether two sections are byte-identical (without allocating).
 fn sections_identical(a: &Section, b: &Section) -> bool {
     a.header.raw == b.header.raw
         && a.body.len() == b.body.len()
@@ -2458,14 +2339,12 @@ fn sections_identical(a: &Section, b: &Section) -> bool {
         })
 }
 
-/// Whether any property uses syntax that requires `format=4`.
 fn needs_format4<'p>(mut props: impl Iterator<Item = &'p godot_text::Property>) -> bool {
     props.any(|p| {
         p.raw_value.contains("PackedVector4Array") || p.raw_value.contains("PackedByteArray(\"")
     })
 }
 
-/// Sets a connection's `from`/`to` if they differ.
 fn set_endpoints(s: &mut Section, from: &str, to: &str) {
     for (field, value) in [("from", from), ("to", to)] {
         if s.header.get_str(field) != Some(value) {
@@ -2499,7 +2378,6 @@ fn theirs_is_descendant(f: &SceneFile, x: usize, ancestor: usize) -> bool {
     false
 }
 
-/// The property of THEIRS' section that precedes `key` and exists in `ours`.
 fn prev_existing_key(theirs: &Section, key: &str, ours: &Section) -> Option<String> {
     let mut prev = None;
     for p in theirs.properties() {

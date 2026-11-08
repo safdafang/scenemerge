@@ -1,10 +1,3 @@
-//! Benchmark: diff of a scene with 10 000 nodes (spec: < 200 ms).
-//!
-//! `cargo bench -p scene-diff`
-//!
-//! Measures what `scenemerge diff` does: parse both files, build both models
-//! and diff them, with the allocator the CLI uses (mimalloc).
-
 #![allow(
     missing_docs,
     clippy::unwrap_used,
@@ -23,7 +16,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 /// A scene with `groups × per_group` nodes plus the root and group nodes.
 /// `variant` 1 changes ~1% of the properties, renames and removes a few
-/// nodes and adds some — the kind of change a real commit makes.
+/// nodes and adds some, the kind of change a real commit makes.
 pub fn generate(groups: usize, per_group: usize, variant: u32, unique_ids: bool) -> String {
     let mut s = String::new();
     s.push_str("[gd_scene format=3 uid=\"uid://bbench00001\"]\n\n");
@@ -57,7 +50,7 @@ pub fn generate(groups: usize, per_group: usize, variant: u32, unique_ids: bool)
             let id = g * per_group + k;
             if variant == 1 && id % 997 == 3 {
                 n += 1;
-                continue; // removed
+                continue;
             }
             let name = if variant == 1 && id % 991 == 5 {
                 format!("Renamed{k}")

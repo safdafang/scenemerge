@@ -1,7 +1,3 @@
-//! Model building, diff and merge must never panic.
-//!
-//! The input is split at NUL bytes into up to three files (base, ours, theirs);
-//! missing parts reuse the previous one.
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
@@ -25,7 +21,6 @@ fuzz_target!(|data: &[u8]| {
     let _ = scene_diff::to_json("a", "b", &d);
     let _ = scene_diff::render_human("x", &d, &scene_diff::HumanOptions::default());
     let _ = scene_diff::canonical_text(&fa);
-    // A file never differs from itself.
     assert!(scene_diff::diff(&fa, &fa, &scene_diff::DiffOptions::default()).is_empty());
     let valid = fa.validate().is_empty() && fb.validate().is_empty() && fc.validate().is_empty();
     for style in [ConflictStyle::Markers, ConflictStyle::Ours, ConflictStyle::Theirs] {
@@ -34,7 +29,6 @@ fuzz_target!(|data: &[u8]| {
             ..MergeOptions::default()
         };
         let r = merge(&fa, &fb, &fc, &opts);
-        // On valid inputs of one kind, merging never fails.
         if valid && fa.kind == fb.kind && fb.kind == fc.kind {
             assert!(r.is_ok(), "{:?}", r.err());
         }
