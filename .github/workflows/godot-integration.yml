@@ -22,14 +22,14 @@ jobs:
       matrix:
         godot: ["4.6.3", "4.7.2"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --release -p scenemerge
 
       - name: Cache Godot
         id: cache-godot
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot
           key: godot-${{ matrix.godot }}-linux-x86_64
